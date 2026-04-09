@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>統計分析框架決策圖 ｜ 114-2 進階社會統計</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto Sans TC',Arial,sans-serif;background:#eef2f7;color:#1a202c;min-height:100vh;line-height:1.6}
+
+/* ─── Header ─── */
+.page-header{background:linear-gradient(135deg,#1a365d 0%,#2a69ac 55%,#3182ce 100%);color:#fff;padding:28px 24px 22px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.page-header h1{font-size:1.55rem;font-weight:800;letter-spacing:.02em;margin-bottom:5px}
+.page-header p{font-size:.875rem;opacity:.85}
+.page-header .tags{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:2px 12px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.06em}
+
+/* ─── Layout ─── */
+.main{max-width:1280px;margin:0 auto;padding:20px 16px 40px}
+
+/* ─── Section title ─── */
+.sec-title{display:flex;align-items:center;gap:12px;margin:24px 0 14px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#718096}
+.sec-title::before,.sec-title::after{content:'';flex:1;height:1px;background:#d1d5db}
+
+/* ─── Panel (white card base) ─── */
+.panel{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden;margin-bottom:18px}
+
+/* ─── WIZARD ─── */
+.wizard-body{padding:22px 24px}
+.wizard-lead{font-size:.88rem;color:#4a5568;margin-bottom:18px;line-height:1.7}
+.wizard-lead strong{color:#1a202c}
+
+.q-block{margin-bottom:14px}
+.q-label{font-size:.83rem;font-weight:600;color:#718096;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.q-text{font-size:1rem;font-weight:700;color:#2d3748;margin-bottom:12px}
+
+.btn-group{display:flex;flex-wrap:wrap;gap:10px}
+.q-btn{padding:10px 22px;border:2px solid #e2e8f0;border-radius:10px;background:#f7fafc;cursor:pointer;font-size:.88rem;font-weight:600;color:#4a5568;transition:all .18s;font-family:inherit}
+.q-btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.q-btn.sel-anova{border-color:#3182ce;background:#ebf8ff;color:#2b6cb0}
+.q-btn.sel-chi2{border-color:#38a169;background:#f0fff4;color:#276749}
+.q-btn.sel-oneway{border-color:#3182ce;background:#3182ce;color:#fff;box-shadow:0 4px 12px rgba(49,130,206,.3)}
+.q-btn.sel-twoway{border-color:#805ad5;background:#805ad5;color:#fff;box-shadow:0 4px 12px rgba(128,90,213,.3)}
+.q-btn.sel-gof{border-color:#dd6b20;background:#dd6b20;color:#fff;box-shadow:0 4px 12px rgba(221,107,32,.3)}
+.q-btn.sel-indep{border-color:#2c7a7b;background:#2c7a7b;color:#fff;box-shadow:0 4px 12px rgba(44,122,123,.3)}
+
+.wizard-arrow{text-align:center;font-size:1.6rem;color:#a0aec0;margin:6px 0;animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+
+.result-card{border:2px solid;border-radius:12px;padding:18px 22px;margin-top:10px;display:none;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-card.show{display:block}
+.result-card.rc-oneway{border-color:#3182ce;background:#ebf8ff}
+.result-card.rc-twoway{border-color:#805ad5;background:#faf5ff}
+.result-card.rc-gof{border-color:#dd6b20;background:#fff7ed}
+.result-card.rc-indep{border-color:#2c7a7b;background:#e6fffa}
+.result-title{font-size:1.05rem;font-weight:800;margin-bottom:6px}
+.result-title span{font-size:.8rem;font-weight:500;margin-left:8px;opacity:.7}
+.result-hint{font-size:.85rem;color:#4a5568;line-height:1.7}
+.result-hint code{background:#e2e8f0;padding:1px 6px;border-radius:4px;font-size:.82rem}
+.go-btn{display:inline-block;margin-top:10px;padding:7px 20px;border-radius:8px;border:none;color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;transition:filter .2s}
+.go-btn:hover{filter:brightness(1.12)}
+.go-btn-oneway{background:#3182ce}
+.go-btn-twoway{background:#805ad5}
+.go-btn-gof{background:#dd6b20}
+.go-btn-indep{background:#2c7a7b}
+
+.reset-btn{margin-top:14px;background:none;border:1px solid #e2e8f0;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;color:#718096;font-family:inherit}
+.reset-btn:hover{background:#f7fafc;color:#4a5568}
+
+/* ─── Method Cards Grid ─── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+.method-card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden;border:2px solid transparent;transition:border-color .25s,box-shadow .25s}
+.method-card.highlight{border-color:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 15%,transparent)}
+
+.mc-header{padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.mc-header-left{}
+.mc-type{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-bottom:3px}
+.mc-name{font-size:1rem;font-weight:800;color:#fff}
+.mc-sub{font-size:.78rem;color:rgba(255,255,255,.8);margin-top:2px}
+.mc-toggle{font-size:1.1rem;color:rgba(255,255,255,.85);transition:transform .3s}
+.method-card.open .mc-toggle{transform:rotate(180deg)}
+
+.mc-body{max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.2,1)}
+.method-card.open .mc-body{max-height:3000px}
+
+/* ─── Tabs ─── */
+.tab-bar{display:flex;border-bottom:2px solid #e2e8f0;padding:0 20px;background:#fafbfc;gap:0;overflow-x:auto}
+.tab-btn{padding:10px 16px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:#718096;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:inherit;transition:color .15s}
+.tab-btn:hover{color:#2d3748}
+.tab-btn.active{color:var(--c);border-bottom-color:var(--c)}
+
+.tab-pane{display:none;padding:20px}
+.tab-pane.active{display:block}
+
+/* ─── Content elements ─── */
+.step-list{list-style:none}
+.step-item{display:flex;gap:12px;margin-bottom:13px;align-items:flex-start}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:1px}
+.stext{flex:1;font-size:.88rem;line-height:1.7}
+.stext strong{color:#1a202c}
+.stext em{color:var(--c);font-style:normal;font-weight:600}
+
+.formula-box{background:#1a202c;color:#f6e05e;padding:13px 16px;border-radius:9px;font-family:'Courier New',monospace;font-size:.85rem;line-height:2;margin:10px 0;overflow-x:auto}
+.formula-box .comment{color:#718096}
+
+.hypo-box{background:#f7fafc;border:1px solid #e2e8f0;border-radius:9px;padding:13px 16px;margin:10px 0;font-size:.88rem}
+.h0{color:#c53030;font-weight:700}
+.h1{color:#276749;font-weight:700}
+
+.ex-box{border-radius:0 9px 9px 0;padding:14px 16px;margin:12px 0;font-size:.85rem;line-height:1.75;border-left:4px solid}
+.ex-box.ex-blue{background:#ebf8ff;border-color:#3182ce}
+.ex-box.ex-green{background:#f0fff4;border-color:#38a169}
+.ex-box.ex-orange{background:#fff7ed;border-color:#dd6b20}
+.ex-box.ex-teal{background:#e6fffa;border-color:#2c7a7b}
+.ex-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;opacity:.65}
+
+.stata-block{background:#0f1923;padding:14px 16px;border-radius:9px;font-family:'Courier New',monospace;font-size:.82rem;line-height:2;margin:10px 0;overflow-x:auto}
+.s-cmt{color:#718096}
+.s-cmd{color:#90cdf4}
+.s-var{color:#fc8181}
+.s-opt{color:#f6ad55}
+.s-str{color:#68d391}
+.s-num{color:#f6e05e}
+
+.calc-block{background:#fffbeb;border:1px solid #fbd38d;border-left:4px solid #f6ad55;border-radius:0 9px 9px 0;padding:13px 16px;margin:10px 0;font-size:.85rem}
+.calc-title{color:#c05621;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.key{display:inline-block;background:#2d3748;color:#f7fafc;padding:2px 9px;border-radius:5px;font-family:monospace;font-size:.8rem;border-bottom:2px solid #1a202c;margin:1px 2px}
+.kseq{line-height:2.5}
+
+.note-box{background:#fff5f5;border:1px solid #feb2b2;border-left:4px solid #e53e3e;border-radius:0 9px 9px 0;padding:10px 14px;font-size:.82rem;margin:8px 0;color:#742a2a}
+.tip-box{background:#f0fff4;border:1px solid #9ae6b4;border-left:4px solid #38a169;border-radius:0 9px 9px 0;padding:10px 14px;font-size:.82rem;margin:8px 0}
+.purple-box{background:#faf5ff;border:1px solid #d6bcfa;border-left:4px solid #805ad5;border-radius:0 9px 9px 0;padding:10px 14px;font-size:.82rem;margin:8px 0}
+
+/* ─── ANOVA table ─── */
+.atable{width:100%;border-collapse:collapse;font-size:.82rem;margin:10px 0}
+.atable th{background:var(--c);color:#fff;padding:8px 12px;text-align:center}
+.atable td{padding:8px 12px;border:1px solid #e2e8f0;text-align:center}
+.atable tr:nth-child(even) td{background:#f7fafc}
+.atable .hi{background:#bee3f8 !important;font-weight:700}
+
+/* ─── Quick ref table ─── */
+.qr-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.qr-table th{background:#2d3748;color:#fff;padding:9px 14px;text-align:left;font-weight:600}
+.qr-table td{padding:9px 14px;border-bottom:1px solid #e2e8f0;vertical-align:top;line-height:1.65}
+.qr-table tr:hover td{background:#f7fafc}
+.qr-table .mc{font-family:monospace;font-size:.8rem;background:#e2e8f0;padding:1px 6px;border-radius:4px}
+
+/* Color utilities */
+.c-blue{color:#3182ce}.c-green{color:#38a169}.c-orange{color:#dd6b20}.c-teal{color:#2c7a7b}.c-purple{color:#805ad5}
+.bg-blue{--c:#3182ce}.bg-purple{--c:#805ad5}.bg-orange{--c:#dd6b20}.bg-teal{--c:#2c7a7b}
+
+/* ─── Badge ─── */
+.badge{display:inline-block;padding:1px 9px;border-radius:12px;font-size:.72rem;font-weight:700}
+.b-blue{background:#bee3f8;color:#2b6cb0}
+.b-green{background:#c6f6d5;color:#276749}
+.b-orange{background:#feebc8;color:#c05621}
+.b-red{background:#fed7d7;color:#9b2c2c}
+.b-purple{background:#e9d8fd;color:#553c9a}
+.b-teal{background:#b2f5ea;color:#234e52}
+
+/* ─── Responsive ─── */
+@media(max-width:700px){
+  .cards-grid{grid-template-columns:1fr}
+  .page-header h1{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📊 統計分析框架決策圖</h1>
+  <p>114-2 進階社會統計 · 期中考複習 · 王晉謙</p>
+  <div class="tags">
+    <span class="tag">ANOVA</span>
+    <span class="tag">卡方檢定</span>
+    <span class="tag">後驗比較</span>
+    <span class="tag">作業對照</span>
+    <span class="tag">Stata &amp; fx-82</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ========== WIZARD ========== -->
+  <div class="sec-title"><span>🧭 我遇到什麼題目？— 決策嚮導</span></div>
+  <div class="panel">
+    <div class="wizard-body">
+      <p class="wizard-lead">根據題目的<strong>依變數類型</strong>與<strong>研究問題</strong>，一步步選出正確的分析框架。</p>
+
+      <!-- Q1 -->
+      <div class="q-block" id="q1-block">
+        <div class="q-label">第 1 步</div>
+        <div class="q-text">你的<strong>依變數（Y）</strong>是什麼類型？</div>
+        <div class="btn-group">
+          <button class="q-btn" id="btn-cont" onclick="pick1('cont')">📏 連續變數<br><small style="font-weight:400;font-size:.78rem">（如：分數、態度量表、收入）</small></button>
+          <button class="q-btn" id="btn-cat" onclick="pick1('cat')">🏷️ 類別變數<br><small style="font-weight:400;font-size:.78rem">（如：是/否、政黨類別、國家）</small></button>
+        </div>
+      </div>
+
+      <!-- Q2a -->
+      <div class="q-block" id="q2a-block" style="display:none">
+        <div class="wizard-arrow">↓</div>
+        <div class="q-label">第 2 步</div>
+        <div class="q-text">自變數（X）有幾個？</div>
+        <div class="btn-group">
+          <button class="q-btn" id="btn-oneway" onclick="pick2a('oneway')">1️⃣ 一個自變數<br><small style="font-weight:400;font-size:.78rem">（例：政黨 → 政治觀點）</small></button>
+          <button class="q-btn" id="btn-twoway" onclick="pick2a('twoway')">2️⃣ 兩個自變數<br><small style="font-weight:400;font-size:.78rem">（例：性別 × 地區 → 收入）</small></button>
+        </div>
+      </div>
+
+      <!-- Q2b -->
+      <div class="q-block" id="q2b-block" style="display:none">
+        <div class="wizard-arrow">↓</div>
+        <div class="q-label">第 2 步</div>
+        <div class="q-text">你的研究問題是？</div>
+        <div class="btn-group">
+          <button class="q-btn" id="btn-gof" onclick="pick2b('gof')">📊 一個類別變數的<strong>分布</strong>符合理論比例嗎？<br><small style="font-weight:400;font-size:.78rem">（例：各選項比例是否均等？）</small></button>
+          <button class="q-btn" id="btn-indep" onclick="pick2b('indep')">🔗 兩個類別變數之間<strong>有關聯</strong>嗎？<br><small style="font-weight:400;font-size:.78rem">（例：媽媽教育程度 vs. 政治觀點）</small></button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="result-area"></div>
+
+      <button class="reset-btn" onclick="resetWizard()" style="display:none" id="reset-btn">↺ 重新選擇</button>
+    </div>
+  </div>
+
+  <!-- ========== CARDS GRID ========== -->
+  <div class="sec-title"><span>📋 四大分析框架（點擊展開詳細內容）</span></div>
+  <div class="cards-grid">
+
+    <!-- ===== CARD A: 單因子 ANOVA ===== -->
+    <div class="method-card bg-blue" id="card-oneway">
+      <div class="mc-header" style="background:#2b6cb0" onclick="toggleCard('oneway')">
+        <div class="mc-header-left">
+          <div class="mc-type" style="color:rgba(255,255,255,.75)">ANOVA · 連續 DV</div>
+          <div class="mc-name">單因子 ANOVA</div>
+          <div class="mc-sub">一個類別自變數 (k ≥ 3 組)</div>
+        </div>
+        <div class="mc-toggle">▼</div>
+      </div>
+      <div class="mc-body">
+        <div class="tab-bar bg-blue">
+          <button class="tab-btn active" onclick="showTab('oneway','concept',this)">💡 概念</button>
+          <button class="tab-btn" onclick="showTab('oneway','steps',this)">📐 步驟</button>
+          <button class="tab-btn" onclick="showTab('oneway','hw',this)">📚 作業例子</button>
+          <button class="tab-btn" onclick="showTab('oneway','stata',this)">💻 Stata</button>
+          <button class="tab-btn" onclick="showTab('oneway','calc',this)">🖩 計算機</button>
+        </div>
+
+        <!-- 概念 -->
+        <div class="tab-pane active bg-blue" id="tab-oneway-concept">
+          <p style="font-size:.88rem;color:#4a5568;margin-bottom:14px">比較 <strong>k 個（≥3）獨立組別</strong>的母體平均數是否相等，核心邏輯是「組間變異 vs 組內變異」。</p>
+          <div class="hypo-box">
+            <p class="h0">H₀：μ₁ = μ₂ = … = μₖ　（所有組平均數相等）</p>
+            <p class="h1">H₁：至少一組平均數不同（不需要指定哪組）</p>
+          </div>
+          <div class="formula-box">
+<span class="comment">── 變異量分解 ──</span>
+SST  = SSB + SSW
+<span class="comment">── 組間（Between Groups）──</span>
+SSB  = Σⱼ nⱼ (x̄ⱼ − x̄)²
+dfB  = k − 1
+MSB  = SSB / dfB
+<span class="comment">── 組內（Within Groups）──</span>
+SSW  = SST − SSB
+dfW  = n − k
+MSW  = SSW / dfW
+<span class="comment">── F 統計量 ──</span>
+F    = MSB / MSW   ← F ~ F(dfB, dfW)
+<span class="comment">── 效果量 ──</span>
+η²   = SSB / SST   (0–1，越大效果越強)
+</div>
+          <div class="tip-box">💡 <strong>判斷邏輯：</strong>若組間差異遠大於組內隨機誤差（F >> 1），則可拒絕 H₀。F ≥ F*(df₁, df₂, α) 則拒絕。</div>
+          <div class="note-box">⚠️ <strong>前提假設：</strong>各組獨立、各組來自常態分布、各組變異數相等（Bartlett test / Levene test）。違反變異數同質性時結果仍相對穩健（特別是樣本均等時）。</div>
+          <div class="purple-box"><strong>後驗比較（Post-hoc）：</strong>ANOVA 只告訴你「有差異」，但不知道哪兩組不同 → 需要 Tukey / Bonferroni / Scheffé。<br>
+          &nbsp;&nbsp;• <strong>Tukey</strong>：ω = q√(MSW/nⱼ)，各組 n 相等時最常用<br>
+          &nbsp;&nbsp;• <strong>Bonferroni</strong>：α' = α / C，C = 比較次數，最保守<br>
+          &nbsp;&nbsp;• <strong>Scheffé</strong>：最嚴格，適合複雜比較</div>
+        </div>
+
+        <!-- 步驟 -->
+        <div class="tab-pane bg-blue" id="tab-oneway-steps">
+          <ol class="step-list">
+            <li class="step-item"><div class="snum">1</div><div class="stext"><strong>設定假設</strong><br>H₀: μ₁=μ₂=…=μₖ；H₁: 至少一對不等；設定 α（通常 .05）</div></li>
+            <li class="step-item"><div class="snum">2</div><div class="stext"><strong>計算各組統計量</strong><br>各組樣本數 nⱼ、平均數 x̄ⱼ、全體平均 x̄ = Σnⱼx̄ⱼ / n</div></li>
+            <li class="step-item"><div class="snum">3</div><div class="stext"><strong>計算 SSB（組間變異）</strong><br><em>SSB = Σⱼ nⱼ(x̄ⱼ − x̄)²</em>　→　dfB = k−1　→　MSB = SSB/dfB</div></li>
+            <li class="step-item"><div class="snum">4</div><div class="stext"><strong>計算 SSW（組內變異）</strong><br>若題目給 SST：SSW = SST − SSB；否則用各組方差累加<br>→　dfW = n−k　→　MSW = SSW/dfW</div></li>
+            <li class="step-item"><div class="snum">5</div><div class="stext"><strong>計算 F 統計量</strong><br><em>F = MSB / MSW</em>，查 F 分布表找臨界值 F*(dfB, dfW, α)</div></li>
+            <li class="step-item"><div class="snum">6</div><div class="stext"><strong>決策</strong><br>若 F ≥ F* → 拒絕 H₀；否則保留 H₀。引用 p 值更佳：p &lt; α 則拒絕</div></li>
+            <li class="step-item"><div class="snum">7</div><div class="stext"><strong>效果量</strong><br><em>η² = SSB / SST</em>（小=.01，中=.06，大=.14）</div></li>
+            <li class="step-item"><div class="snum">8</div><div class="stext"><strong>後驗比較（若顯著）</strong><br>Tukey：先計算 ω = q × √(MSW/n)，|x̄ᵢ − x̄ⱼ| &gt; ω 則兩組顯著不同</div></li>
+          </ol>
+          <div class="tip-box">💡 考試填表格時，先把 <strong>df 填好</strong>，再回頭算 SS，最後算 MS 和 F，不容易搞混。</div>
+          <table class="atable">
+            <tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F</th></tr>
+            <tr><td>組間（Between）</td><td>SSB</td><td>k−1</td><td>MSB</td><td class="hi">MSB/MSW</td></tr>
+            <tr><td>組內（Within）</td><td>SSW</td><td>n−k</td><td>MSW</td><td>—</td></tr>
+            <tr><td><strong>全體（Total）</strong></td><td>SST</td><td>n−1</td><td>—</td><td>—</td></tr>
+          </table>
+        </div>
+
+        <!-- 作業例子 -->
+        <div class="tab-pane bg-blue" id="tab-oneway-hw">
+          <div class="ex-box ex-blue">
+            <div class="ex-title">📂 實習作業 1 — tscs_hw1.dta</div>
+            <p><strong>研究問題：</strong>政黨認同（party）是否影響政治觀點（polview，1=極保守～7=極自由）？</p>
+            <p><strong>資料：</strong></p>
+          </div>
+          <table class="atable">
+            <tr><th>組別</th><th>n</th><th>x̄ (polview)</th></tr>
+            <tr><td>泛藍</td><td>324</td><td>3.327</td></tr>
+            <tr><td>泛綠</td><td>461</td><td>4.100</td></tr>
+            <tr><td>都沒有</td><td>951</td><td>3.710</td></tr>
+            <tr><td><strong>全體</strong></td><td><strong>1736</strong></td><td><strong>3.710</strong></td></tr>
+          </table>
+          <table class="atable" style="margin-top:14px">
+            <tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F</th></tr>
+            <tr><td>組間</td><td>115.76</td><td>2</td><td>57.88</td><td class="hi">48.63***</td></tr>
+            <tr><td>組內</td><td>2063.72</td><td>1733</td><td>1.190</td><td>—</td></tr>
+            <tr><td><strong>全體</strong></td><td>2179.48</td><td>1735</td><td>—</td><td>—</td></tr>
+          </table>
+          <div class="ex-box ex-blue" style="margin-top:12px">
+            <p><strong>F*(2, 1733, .05) ≈ 3.00　→　F=48.63 >> 3.00　→　拒絕 H₀</strong></p>
+            <p><strong>效果量：</strong>η² = 115.76 / 2179.48 = <em>.053</em>（中等效果）</p>
+            <p><strong>結論：</strong>政黨認同顯著影響政治觀點（F=48.63, p&lt;.001, η²=.053），泛綠支持者政治觀點最自由（x̄=4.10），泛藍最保守（x̄=3.33）。</p>
+            <p style="margin-top:8px"><strong>後驗比較（Tukey）：</strong>所有配對組別兩兩均顯著不同（泛藍≠泛綠、泛藍≠都沒有、泛綠≠都沒有）。</p>
+          </div>
+          <div class="ex-box ex-blue">
+            <div class="ex-title">📂 正課作業概念延伸</div>
+            <p><strong>常見問答：</strong>η²=.053 代表什麼？<br>→ 政黨認同解釋了政治觀點 5.3% 的變異，其餘 94.7% 來自個體差異（組內）。</p>
+          </div>
+        </div>
+
+        <!-- Stata -->
+        <div class="tab-pane bg-blue" id="tab-oneway-stata">
+          <div class="stata-block">
+<span class="s-cmt">* ─── 讀取資料 ───</span>
+<span class="s-cmd">use</span> <span class="s-str">"tscs_hw1.dta"</span>, clear
+
+<span class="s-cmt">* ─── 單因子 ANOVA（完整輸出含描述統計）───</span>
+<span class="s-cmd">oneway</span> <span class="s-var">polview</span> <span class="s-var">party</span>, <span class="s-opt">tabulate</span>
+
+<span class="s-cmt">* ─── Bartlett 變異數同質性檢定 ───</span>
+<span class="s-cmd">oneway</span> <span class="s-var">polview</span> <span class="s-var">party</span>, <span class="s-opt">tabulate bartlett</span>
+
+<span class="s-cmt">* ─── 後驗比較：Tukey ───</span>
+<span class="s-cmd">pwmean</span> <span class="s-var">polview</span>, <span class="s-opt">over</span>(<span class="s-var">party</span>) <span class="s-opt">mcompare(tukey)</span> <span class="s-opt">effects</span>
+
+<span class="s-cmt">* ─── 後驗比較：Bonferroni ───</span>
+<span class="s-cmd">pwmean</span> <span class="s-var">polview</span>, <span class="s-opt">over</span>(<span class="s-var">party</span>) <span class="s-opt">mcompare(bonferroni)</span> <span class="s-opt">effects</span>
+
+<span class="s-cmt">* ─── 手動計算 η² ───</span>
+<span class="s-cmd">di</span> <span class="s-num">115.76</span> / <span class="s-num">2179.48</span>   <span class="s-cmt">// = 0.0531</span>
+
+<span class="s-cmt">* ─── 視覺化（信賴區間圖）───</span>
+<span class="s-cmd">ciplot</span> <span class="s-var">polview</span>, <span class="s-opt">by</span>(<span class="s-var">party</span>)
+</div>
+          <div class="ex-box ex-blue">
+            <div class="ex-title">⚠️ 常見指令錯誤</div>
+            <p>• <code>oneway y x</code> 正確；<code>anova y x</code> 也可用但輸出格式不同</p>
+            <p>• <code>pwmean</code> 後的變數是 DV，<code>over()</code> 放 IV</p>
+            <p>• 若 Stata 不認識變數，檢查是否有做 <code>recode</code> 或 <code>label</code></p>
+          </div>
+        </div>
+
+        <!-- 計算機 -->
+        <div class="tab-pane bg-blue" id="tab-oneway-calc">
+          <div class="calc-block">
+            <div class="calc-title">🖩 fx-82 Solar II — 計算 SSB（作業例子）</div>
+            <p><strong>目標：</strong>SSB = n₁(x̄₁−x̄)² + n₂(x̄₂−x̄)² + n₃(x̄₃−x̄)²</p>
+            <p style="margin-top:8px"><strong>Step 1：清除記憶</strong></p>
+            <p class="kseq"><span class="key">MRC</span> × 2次 → 記憶歸零</p>
+            <p style="margin-top:8px"><strong>Step 2：計算第一項 324 × (3.327−3.710)²</strong></p>
+            <p class="kseq"><span class="key">3.327</span><span class="key">−</span><span class="key">3.710</span><span class="key">=</span> → 顯示 −0.383<br><span class="key">x²</span> → 顯示 0.146689<br><span class="key">×</span><span class="key">324</span><span class="key">=</span> → 顯示 47.55<br><span class="key">M+</span></p>
+            <p style="margin-top:8px"><strong>Step 3：計算第二項 461 × (4.100−3.710)²</strong></p>
+            <p class="kseq"><span class="key">4.100</span><span class="key">−</span><span class="key">3.710</span><span class="key">=</span> → 0.390<br><span class="key">x²</span> → 0.1521<br><span class="key">×</span><span class="key">461</span><span class="key">=</span> → 70.12<br><span class="key">M+</span></p>
+            <p style="margin-top:8px"><strong>Step 4：計算第三項 951 × (3.710−3.710)²</strong></p>
+            <p class="kseq"><span class="key">3.710</span><span class="key">−</span><span class="key">3.710</span><span class="key">=</span> → 0<br><span class="key">x²</span> → 0<br><span class="key">×</span><span class="key">951</span><span class="key">=</span> → 0<br><span class="key">M+</span></p>
+            <p style="margin-top:8px"><strong>Step 5：讀取結果</strong></p>
+            <p class="kseq"><span class="key">MRC</span> → 顯示 117.67 ≈ SSB</p>
+          </div>
+          <div class="calc-block" style="margin-top:8px">
+            <div class="calc-title">🖩 計算 F 值</div>
+            <p class="kseq"><span class="key">57.88</span> <span class="key">÷</span> <span class="key">1.190</span> <span class="key">=</span> → <strong>48.63</strong></p>
+          </div>
+          <div class="calc-block" style="margin-top:8px">
+            <div class="calc-title">🖩 Tukey ω</div>
+            <p>ω = q × √(MSW / n)，q 值需查表（α=.05, k組, dfW）</p>
+            <p class="kseq"><span class="key">1.190</span><span class="key">÷</span><span class="key">324</span><span class="key">=</span> → 先算 MSW/n<br><span class="key">√</span> → 取平方根<br>再乘以 q 值</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- end card oneway -->
+
+    <!-- ===== CARD B: 二因子 ANOVA ===== -->
+    <div class="method-card bg-purple" id="card-twoway">
+      <div class="mc-header" style="background:#6b46c1" onclick="toggleCard('twoway')">
+        <div class="mc-header-left">
+          <div class="mc-type" style="color:rgba(255,255,255,.75)">ANOVA · 連續 DV</div>
+          <div class="mc-name">二因子 ANOVA</div>
+          <div class="mc-sub">兩個類別自變數 + 交互作用</div>
+        </div>
+        <div class="mc-toggle">▼</div>
+      </div>
+      <div class="mc-body">
+        <div class="tab-bar bg-purple">
+          <button class="tab-btn active" onclick="showTab('twoway','concept',this)">💡 概念</button>
+          <button class="tab-btn" onclick="showTab('twoway','steps',this)">📐 步驟</button>
+          <button class="tab-btn" onclick="showTab('twoway','stata',this)">💻 Stata</button>
+        </div>
+
+        <!-- 概念 -->
+        <div class="tab-pane active bg-purple" id="tab-twoway-concept">
+          <p style="font-size:.88rem;color:#4a5568;margin-bottom:14px">同時檢驗 <strong>A</strong>、<strong>B</strong> 兩個自變數對 Y 的效果，以及它們的<strong>交互作用</strong>（A×B）。</p>
+          <div class="hypo-box">
+            <p class="h0">H₀ₐ：A 無主效果（各 A 組平均相等）</p>
+            <p class="h0">H₀ᵦ：B 無主效果（各 B 組平均相等）</p>
+            <p class="h0">H₀ₐᵦ：A×B 無交互作用</p>
+          </div>
+          <div class="formula-box">
+SST = SS_A + SS_B + SS_AB + SS_error
+df_A   = a − 1
+df_B   = b − 1
+df_AB  = (a−1)(b−1)
+df_err = ab(n−1)   <span class="comment">← n = 每細格樣本數</span>
+F_A   = MS_A  / MS_err
+F_B   = MS_B  / MS_err
+F_AB  = MS_AB / MS_err
+</div>
+          <div class="note-box">⚠️ <strong>先看交互作用！</strong>若 F_AB 顯著，A、B 的主效果解釋需謹慎，應畫交互作用圖（Interaction Plot）來解釋。</div>
+          <div class="purple-box"><strong>交互作用的意思：</strong>A 對 Y 的影響因 B 的不同而不同（反之亦然）。圖上兩條線若非平行即有交互作用。</div>
+        </div>
+
+        <!-- 步驟 -->
+        <div class="tab-pane bg-purple" id="tab-twoway-steps">
+          <ol class="step-list">
+            <li class="step-item"><div class="snum">1</div><div class="stext">設三組假設（主效果 A、主效果 B、交互 A×B）</div></li>
+            <li class="step-item"><div class="snum">2</div><div class="stext">計算各細格（Cell）平均數</div></li>
+            <li class="step-item"><div class="snum">3</div><div class="stext">分解變異：SS_A, SS_B, SS_AB, SS_error</div></li>
+            <li class="step-item"><div class="snum">4</div><div class="stext">計算各 F 值（分別對 MS_error）</div></li>
+            <li class="step-item"><div class="snum">5</div><div class="stext"><strong>先判斷交互作用</strong>，若顯著畫互動圖、做 Simple Effects 分析</div></li>
+            <li class="step-item"><div class="snum">6</div><div class="stext">若無交互，再解釋主效果</div></li>
+          </ol>
+        </div>
+
+        <!-- Stata -->
+        <div class="tab-pane bg-purple" id="tab-twoway-stata">
+          <div class="stata-block">
+<span class="s-cmt">* ─── 二因子 ANOVA（含交互項）───</span>
+<span class="s-cmd">anova</span> <span class="s-var">income</span> <span class="s-var">gender</span>##<span class="s-var">region</span>
+
+<span class="s-cmt">* ─── 等同寫法 ───</span>
+<span class="s-cmd">anova</span> <span class="s-var">income</span> <span class="s-var">gender</span> <span class="s-var">region</span> <span class="s-var">gender</span>#<span class="s-var">region</span>
+
+<span class="s-cmt">* ─── 邊際平均數與互動圖 ───</span>
+<span class="s-cmd">margins</span> <span class="s-var">gender</span>#<span class="s-var">region</span>
+<span class="s-cmd">marginsplot</span>
+</div>
+        </div>
+      </div>
+    </div><!-- end card twoway -->
+
+    <!-- ===== CARD C: 適合度 χ² ===== -->
+    <div class="method-card bg-orange" id="card-gof">
+      <div class="mc-header" style="background:#c05621" onclick="toggleCard('gof')">
+        <div class="mc-header-left">
+          <div class="mc-type" style="color:rgba(255,255,255,.75)">卡方檢定 · 類別 DV</div>
+          <div class="mc-name">χ² 適合度檢定</div>
+          <div class="mc-sub">Goodness-of-Fit Test</div>
+        </div>
+        <div class="mc-toggle">▼</div>
+      </div>
+      <div class="mc-body">
+        <div class="tab-bar bg-orange">
+          <button class="tab-btn active" onclick="showTab('gof','concept',this)">💡 概念</button>
+          <button class="tab-btn" onclick="showTab('gof','steps',this)">📐 步驟</button>
+          <button class="tab-btn" onclick="showTab('gof','hw',this)">📚 作業例子</button>
+          <button class="tab-btn" onclick="showTab('gof','stata',this)">💻 Stata</button>
+          <button class="tab-btn" onclick="showTab('gof','calc',this)">🖩 計算機</button>
+        </div>
+
+        <!-- 概念 -->
+        <div class="tab-pane active bg-orange" id="tab-gof-concept">
+          <p style="font-size:.88rem;color:#4a5568;margin-bottom:14px"><strong>一個類別變數</strong>的觀察次數分布是否符合某個<strong>理論（預期）比例</strong>？</p>
+          <div class="hypo-box">
+            <p class="h0">H₀：p₁=p₁₀, p₂=p₂₀, …, pₖ=pₖ₀　（觀察分布符合理論）</p>
+            <p class="h1">H₁：至少一個 pᵢ ≠ pᵢ₀　（不符合理論分布）</p>
+          </div>
+          <div class="formula-box">
+<span class="comment">── 計算期望次數 ──</span>
+Eᵢ = n × pᵢ₀    <span class="comment">← n 為總樣本數，pᵢ₀ 為理論比例</span>
+
+<span class="comment">── 卡方統計量 ──</span>
+χ² = Σᵢ (Oᵢ − Eᵢ)² / Eᵢ
+
+<span class="comment">── 自由度 ──</span>
+df = k − 1      <span class="comment">← k 為類別數</span>
+
+<span class="comment">── 決策 ──</span>
+χ² ≥ χ²*(df, α) → 拒絕 H₀
+</div>
+          <div class="tip-box">💡 <strong>前提：</strong>每個類別的期望次數 Eᵢ ≥ 5（若違反需合併類別或用 Fisher exact test）</div>
+          <div class="note-box">⚠️ 適合度檢定只有<strong>一個變數</strong>，不分 row/column。若題目有兩個變數 → 用獨立性/同質性檢定！</div>
+        </div>
+
+        <!-- 步驟 -->
+        <div class="tab-pane bg-orange" id="tab-gof-steps">
+          <ol class="step-list">
+            <li class="step-item"><div class="snum">1</div><div class="stext"><strong>設定假設</strong><br>H₀: p₁=p₁₀, …；H₁: 至少一個不符</div></li>
+            <li class="step-item"><div class="snum">2</div><div class="stext"><strong>計算期望次數</strong><br><em>Eᵢ = n × pᵢ₀</em>　確認所有 Eᵢ ≥ 5</div></li>
+            <li class="step-item"><div class="snum">3</div><div class="stext"><strong>建立計算表格</strong><br>列出 Oᵢ, Eᵢ, (Oᵢ−Eᵢ), (Oᵢ−Eᵢ)², (Oᵢ−Eᵢ)²/Eᵢ</div></li>
+            <li class="step-item"><div class="snum">4</div><div class="stext"><strong>計算 χ²</strong><br>加總所有 (O−E)²/E</div></li>
+            <li class="step-item"><div class="snum">5</div><div class="stext"><strong>自由度</strong><br><em>df = k − 1</em></div></li>
+            <li class="step-item"><div class="snum">6</div><div class="stext"><strong>決策與結論</strong><br>χ² ≥ χ²* → 拒絕 H₀；寫出具體結論</div></li>
+          </ol>
+          <div class="note-box">⚠️ 若理論比例是「均等」（每組相等），則 Eᵢ = n/k</div>
+        </div>
+
+        <!-- 作業例子 -->
+        <div class="tab-pane bg-orange" id="tab-gof-hw">
+          <div class="ex-box ex-orange">
+            <div class="ex-title">📂 實習作業 1 — M型社會認同</div>
+            <p><strong>研究問題：</strong>台灣民眾對「M型社會」的認同是否均等分布？</p>
+            <p><strong>χ² = 2124.81　（極顯著！）</strong></p>
+            <p>→ 各類別的實際觀察比例與均等分布有極大差距，有些選項被大量選中，有些幾乎無人選。</p>
+          </div>
+          <div class="ex-box ex-orange">
+            <div class="ex-title">📂 正課作業 2 — Coke vs Pepsi 市占率</div>
+            <p><strong>研究問題：</strong>可口可樂與百事可樂的消費者偏好是否各佔 50%？</p>
+            <p><strong>H₀：</strong>p_Coke = .50, p_Pepsi = .50（偏好均等）</p>
+            <p><strong>期望次數：</strong>E = n × 0.50（各類別相等）</p>
+            <p><strong>df = 2 − 1 = 1</strong>；χ²*(1, .05) = 3.84</p>
+          </div>
+          <div class="ex-box ex-orange">
+            <div class="ex-title">📂 計算示範（均等分布的簡單情況）</div>
+            <p>若 n=200，k=5 類別，理論均等 → E = 200/5 = <strong>40</strong></p>
+            <p>觀察 O = [52, 38, 45, 41, 24]</p>
+            <p>χ² = (52-40)²/40 + (38-40)²/40 + (45-40)²/40 + (41-40)²/40 + (24-40)²/40</p>
+            <p>= 144/40 + 4/40 + 25/40 + 1/40 + 256/40 = <strong>430/40 = 10.75</strong></p>
+            <p>df=4；χ²*(4,.05)=9.49 → <strong>拒絕 H₀</strong></p>
+          </div>
+        </div>
+
+        <!-- Stata -->
+        <div class="tab-pane bg-orange" id="tab-gof-stata">
+          <div class="stata-block">
+<span class="s-cmt">* ─── 適合度檢定（指定各類別理論比例）───</span>
+<span class="s-cmd">csgof</span> <span class="s-var">polview</span>, <span class="s-opt">expperc</span>(<span class="s-num">10 20 30 25 15</span>)
+<span class="s-cmt">* 數字代表各類別的理論百分比（加總=100）</span>
+
+<span class="s-cmt">* ─── 均等分布（不指定比例）───</span>
+<span class="s-cmd">csgof</span> <span class="s-var">polview</span>
+<span class="s-cmt">* 預設各類別等比例</span>
+
+<span class="s-cmt">* ─── 查看原始次數 ───</span>
+<span class="s-cmd">tab</span> <span class="s-var">polview</span>
+
+<span class="s-cmt">* ─── M型社會 (如 mtype 變數，7點量表均等) ───</span>
+<span class="s-cmd">csgof</span> <span class="s-var">mtype</span>
+</div>
+          <div class="ex-box ex-orange">
+            <div class="ex-title">⚠️ csgof 常見錯誤</div>
+            <p>• <code>expperc()</code> 的數字加總必須等於 100</p>
+            <p>• 類別數要與 <code>expperc()</code> 的數字個數相符</p>
+            <p>• 若變數是字串，先轉為數值再用</p>
+          </div>
+        </div>
+
+        <!-- 計算機 -->
+        <div class="tab-pane bg-orange" id="tab-gof-calc">
+          <div class="calc-block">
+            <div class="calc-title">🖩 fx-82 — 計算 χ²（記憶累加法）</div>
+            <p><strong>目標：</strong>Σ (O−E)²/E，用 M+ 逐項累加</p>
+            <p style="margin-top:8px"><strong>清除記憶：</strong></p>
+            <p class="kseq"><span class="key">MRC</span> × 2次</p>
+            <p style="margin-top:8px"><strong>每一項（以 O=52, E=40 為例）：</strong></p>
+            <p class="kseq"><span class="key">52</span><span class="key">−</span><span class="key">40</span><span class="key">=</span> → 12<br><span class="key">x²</span> → 144<br><span class="key">÷</span><span class="key">40</span><span class="key">=</span> → 3.6<br><span class="key">M+</span></p>
+            <p style="margin-top:8px"><strong>重複上述步驟直到所有項都加完，再：</strong></p>
+            <p class="kseq"><span class="key">MRC</span> → 顯示 χ² 總和</p>
+          </div>
+          <div class="tip-box">💡 <strong>快速核對：</strong>Σ(O−E) 必須 = 0！算完可以先加總 O 跟加總 E 確認相等。</div>
+        </div>
+      </div>
+    </div><!-- end card gof -->
+
+    <!-- ===== CARD D: 獨立性/同質性 χ² ===== -->
+    <div class="method-card bg-teal" id="card-indep">
+      <div class="mc-header" style="background:#234e52" onclick="toggleCard('indep')">
+        <div class="mc-header-left">
+          <div class="mc-type" style="color:rgba(255,255,255,.75)">卡方檢定 · 類別 DV</div>
+          <div class="mc-name">χ² 獨立性／同質性檢定</div>
+          <div class="mc-sub">Independence / Homogeneity Test</div>
+        </div>
+        <div class="mc-toggle">▼</div>
+      </div>
+      <div class="mc-body">
+        <div class="tab-bar bg-teal">
+          <button class="tab-btn active" onclick="showTab('indep','concept',this)">💡 概念</button>
+          <button class="tab-btn" onclick="showTab('indep','steps',this)">📐 步驟</button>
+          <button class="tab-btn" onclick="showTab('indep','hw',this)">📚 作業例子</button>
+          <button class="tab-btn" onclick="showTab('indep','stata',this)">💻 Stata</button>
+          <button class="tab-btn" onclick="showTab('indep','calc',this)">🖩 計算機</button>
+        </div>
+
+        <!-- 概念 -->
+        <div class="tab-pane active bg-teal" id="tab-indep-concept">
+          <table style="width:100%;border-collapse:collapse;font-size:.83rem;margin-bottom:14px">
+            <tr style="background:#234e52;color:#fff"><th style="padding:8px">　</th><th style="padding:8px">獨立性檢定</th><th style="padding:8px">同質性檢定</th></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;font-weight:600">取樣方式</td><td style="padding:8px;border:1px solid #e2e8f0">單一樣本，測量兩個變數</td><td style="padding:8px;border:1px solid #e2e8f0">多個獨立樣本，各測一個變數</td></tr>
+            <tr style="background:#f7fafc"><td style="padding:8px;border:1px solid #e2e8f0;font-weight:600">研究問題</td><td style="padding:8px;border:1px solid #e2e8f0">兩變數有無關聯？</td><td style="padding:8px;border:1px solid #e2e8f0">多組的分布是否相同？</td></tr>
+            <tr><td style="padding:8px;border:1px solid #e2e8f0;font-weight:600">計算方式</td><td colspan="2" style="padding:8px;border:1px solid #e2e8f0;text-align:center">完全相同！Eᵢⱼ = (Rᵢ × Cⱼ) / n</td></tr>
+          </table>
+          <div class="hypo-box">
+            <p class="h0">H₀：兩個類別變數互相獨立（無關聯）</p>
+            <p class="h1">H₁：兩個類別變數有關聯</p>
+          </div>
+          <div class="formula-box">
+<span class="comment">── 期望次數（關鍵公式！）──</span>
+Eᵢⱼ = (Rᵢ × Cⱼ) / n
+      = 第 i 列總和 × 第 j 行總和 / 總 n
+
+<span class="comment">── 卡方統計量 ──</span>
+χ² = Σᵢ Σⱼ (Oᵢⱼ − Eᵢⱼ)² / Eᵢⱼ
+
+<span class="comment">── 自由度 ──</span>
+df = (R−1)(C−1)    <span class="comment">← R=列數, C=行數</span>
+
+<span class="comment">── 標準化殘差 ──</span>
+SR_ij = (Oᵢⱼ − Eᵢⱼ) / √Eᵢⱼ
+|SR| > 2 → 該格顯著偏離期望
+</div>
+          <div class="tip-box">💡 <strong>效果量：</strong>Cramér's V = √(χ²/(n×min(R−1,C−1)))，0=無關，1=完全相關</div>
+          <div class="note-box">⚠️ <strong>前提：</strong>所有格 Eᵢⱼ ≥ 5（至少 80% 的格）；若違反需合併類別</div>
+        </div>
+
+        <!-- 步驟 -->
+        <div class="tab-pane bg-teal" id="tab-indep-steps">
+          <ol class="step-list">
+            <li class="step-item"><div class="snum">1</div><div class="stext"><strong>設定假設</strong><br>H₀: 兩變數獨立（無關聯）；H₁: 有關聯；設 α=.05</div></li>
+            <li class="step-item"><div class="snum">2</div><div class="stext"><strong>建立列聯表（觀察次數）</strong><br>確認行列加總正確；計算總 n</div></li>
+            <li class="step-item"><div class="snum">3</div><div class="stext"><strong>計算所有格的期望次數</strong><br><em>Eᵢⱼ = (列總和 × 行總和) / n</em>；確認 Eᵢⱼ ≥ 5</div></li>
+            <li class="step-item"><div class="snum">4</div><div class="stext"><strong>計算 χ²</strong><br>對每一格計算 (O−E)²/E，然後加總</div></li>
+            <li class="step-item"><div class="snum">5</div><div class="stext"><strong>自由度與臨界值</strong><br><em>df = (R−1)(C−1)</em>；查 χ²*(df, α=.05)</div></li>
+            <li class="step-item"><div class="snum">6</div><div class="stext"><strong>決策與結論</strong><br>χ² ≥ χ²* → 拒絕 H₀，結論要有實質意義</div></li>
+            <li class="step-item"><div class="snum">7</div><div class="stext"><strong>標準化殘差（若顯著）</strong><br>計算 SR = (O−E)/√E，找出哪些格子顯著偏離<br>|SR| &gt; 2 → 該格子有顯著差異</div></li>
+          </ol>
+        </div>
+
+        <!-- 作業例子 -->
+        <div class="tab-pane bg-teal" id="tab-indep-hw">
+          <div class="ex-box ex-teal">
+            <div class="ex-title">📂 實習作業 1 — mom × polview（4×5 列聯表）</div>
+            <p><strong>研究問題：</strong>媽媽教育程度（mom，4類）與政治觀點（polview，5類）是否有關聯？</p>
+            <p><strong>df = (4−1)(5−1) = 3 × 4 = 12</strong>（可能因合併而調整）</p>
+            <p><strong>χ² = 49.66</strong></p>
+            <p><strong>χ²*(12, .05) = 21.03 → 49.66 >> 21.03 → 拒絕 H₀</strong></p>
+            <p><strong>結論：</strong>媽媽教育程度與政治觀點有顯著關聯（χ²=49.66, df=12, p&lt;.001）。透過標準化殘差可找出哪些組合特別突出。</p>
+          </div>
+          <div class="ex-box ex-teal">
+            <div class="ex-title">📂 正課作業 2 — 宗教信仰 × 政黨傾向（2×2）</div>
+            <p><strong>研究問題：</strong>宗教信仰（有/無）與政黨傾向（藍/綠）是否有關聯？</p>
+            <p><strong>df = (2−1)(2−1) = 1</strong></p>
+            <p><strong>期望次數公式（以 E₁₁ 為例）：</strong></p>
+            <p>E₁₁ = (第1列總 × 第1行總) / n</p>
+          </div>
+          <div class="ex-box ex-teal">
+            <div class="ex-title">📂 正課作業 2 — 政治保守主義跨國同質性（2×5）</div>
+            <p><strong>研究問題：</strong>各國民眾的政治保守主義分布是否相同？（同質性檢定）</p>
+            <p><strong>df = (2−1)(5−1) = 1 × 4 = 4</strong></p>
+            <p><strong>5個國家，每國分保守/不保守</strong></p>
+            <p>雖然研究設計是「多個獨立樣本（各國）」，但計算方式與獨立性檢定完全相同！</p>
+          </div>
+          <div class="ex-box ex-teal">
+            <div class="ex-title">💡 標準化殘差解讀（重要！）</div>
+            <p>SR = (O−E)/√E</p>
+            <p>• SR &gt; +2：該格子的觀察次數<strong>顯著多於</strong>期望（正向偏離）</p>
+            <p>• SR &lt; −2：該格子的觀察次數<strong>顯著少於</strong>期望（負向偏離）</p>
+            <p>• |SR| ≤ 2：該格子符合獨立假設，無顯著偏離</p>
+          </div>
+        </div>
+
+        <!-- Stata -->
+        <div class="tab-pane bg-teal" id="tab-indep-stata">
+          <div class="stata-block">
+<span class="s-cmt">* ─── 基本獨立性檢定 ───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2</span>
+
+<span class="s-cmt">* ─── 含期望次數 ───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2 expected</span>
+
+<span class="s-cmt">* ─── 標準化殘差（cchi2 = cell chi-squared contribution）───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2 expected cchi2</span>
+
+<span class="s-cmt">* ─── 含效果量 Cramér's V ───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2 expected V</span>
+
+<span class="s-cmt">* ─── 含列%、行% ───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2 row col</span>
+
+<span class="s-cmt">* ─── 完整輸出 ───</span>
+<span class="s-cmd">tabulate</span> <span class="s-var">mom</span> <span class="s-var">polview</span>, <span class="s-opt">chi2 expected V cchi2 row col</span>
+</div>
+          <div class="ex-box ex-teal">
+            <div class="ex-title">⚠️ Stata tabulate 重要說明</div>
+            <p>• 第一個變數 = <strong>列（row）</strong>；第二個 = <strong>行（column）</strong></p>
+            <p>• <code>cchi2</code> 輸出的是每格對 χ² 的貢獻，需自行取符號開根號才是標準化殘差</p>
+            <p>• 若類別太多導致 Eᵢⱼ &lt; 5，Stata 會在輸出中警告</p>
+          </div>
+        </div>
+
+        <!-- 計算機 -->
+        <div class="tab-pane bg-teal" id="tab-indep-calc">
+          <div class="calc-block">
+            <div class="calc-title">🖩 fx-82 — 計算 Eᵢⱼ</div>
+            <p><strong>公式：</strong>Eᵢⱼ = (列總和 × 行總和) / n</p>
+            <p style="margin-top:8px"><strong>例：R₁=300, C₁=400, n=1000</strong></p>
+            <p class="kseq"><span class="key">300</span><span class="key">×</span><span class="key">400</span><span class="key">=</span> → 120000<br><span class="key">÷</span><span class="key">1000</span><span class="key">=</span> → <strong>120</strong></p>
+          </div>
+          <div class="calc-block" style="margin-top:8px">
+            <div class="calc-title">🖩 fx-82 — χ² 逐格累加</div>
+            <p><strong>每一格（以 O=80, E=120 為例）：</strong></p>
+            <p class="kseq"><span class="key">80</span><span class="key">−</span><span class="key">120</span><span class="key">=</span> → −40<br><span class="key">x²</span> → 1600<br><span class="key">÷</span><span class="key">120</span><span class="key">=</span> → 13.33<br><span class="key">M+</span></p>
+            <p style="margin-top:6px">重複所有格後：<span class="key">MRC</span> → 取得 χ²</p>
+          </div>
+          <div class="calc-block" style="margin-top:8px">
+            <div class="calc-title">🖩 標準化殘差 SR</div>
+            <p><strong>SR = (O−E) / √E</strong></p>
+            <p class="kseq"><span class="key">120</span><span class="key">√</span> → √E ≈ 10.95<br>先記住這個值<br><span class="key">80</span><span class="key">−</span><span class="key">120</span><span class="key">=</span> → −40<br><span class="key">÷</span><span class="key">10.95</span><span class="key">=</span> → <strong>−3.65</strong> ← |SR|>2，顯著！</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- end card indep -->
+
+  </div><!-- end cards-grid -->
+
+  <!-- ========== QUICK REFERENCE ========== -->
+  <div class="sec-title"><span>⚡ 四大方法快速對照表</span></div>
+  <div class="panel">
+    <div style="padding:20px;overflow-x:auto">
+      <table class="qr-table">
+        <thead>
+          <tr>
+            <th>　</th>
+            <th>🔵 單因子 ANOVA</th>
+            <th>🟠 χ² 適合度</th>
+            <th>🟢 χ² 獨立性/同質性</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>依變數類型</strong></td>
+            <td>連續（Interval/Ratio）</td>
+            <td>類別（Nominal/Ordinal）</td>
+            <td>類別（Nominal/Ordinal）</td>
+          </tr>
+          <tr>
+            <td><strong>自變數</strong></td>
+            <td>一個類別變數（k≥3 組）</td>
+            <td>無自變數（單一變數分布）</td>
+            <td>兩個類別變數</td>
+          </tr>
+          <tr>
+            <td><strong>H₀</strong></td>
+            <td>μ₁=μ₂=…=μₖ</td>
+            <td>p₁=p₁₀, …, pₖ=pₖ₀</td>
+            <td>兩變數獨立（無關聯）</td>
+          </tr>
+          <tr>
+            <td><strong>核心公式</strong></td>
+            <td class="mc">F = MSB / MSW</td>
+            <td class="mc">χ²=Σ(O-E)²/E; E=np</td>
+            <td class="mc">χ²=Σ(O-E)²/E; E=RC/n</td>
+          </tr>
+          <tr>
+            <td><strong>自由度</strong></td>
+            <td>dfB=k−1；dfW=n−k</td>
+            <td>k − 1</td>
+            <td>(R−1)(C−1)</td>
+          </tr>
+          <tr>
+            <td><strong>效果量</strong></td>
+            <td>η² = SSB/SST</td>
+            <td>—（或 Cramér's V）</td>
+            <td>Cramér's V = √(χ²/n×min(R-1,C-1))</td>
+          </tr>
+          <tr>
+            <td><strong>後驗分析</strong></td>
+            <td>Tukey / Bonferroni / Scheffé</td>
+            <td>（檢視各格殘差）</td>
+            <td>標準化殘差 SR=(O-E)/√E</td>
+          </tr>
+          <tr>
+            <td><strong>Stata 主指令</strong></td>
+            <td class="mc">oneway y x, tabulate<br>pwmean y, over(x) mcompare(tukey)</td>
+            <td class="mc">csgof var, expperc(...)</td>
+            <td class="mc">tabulate x y, chi2 expected</td>
+          </tr>
+          <tr>
+            <td><strong>作業例子</strong></td>
+            <td>party → polview（F=48.63）</td>
+            <td>M型社會分布（χ²=2124.81）</td>
+            <td>mom × polview（χ²=49.66）</td>
+          </tr>
+          <tr>
+            <td><strong>前提條件</strong></td>
+            <td>常態性、變異數齊一</td>
+            <td>Eᵢ ≥ 5</td>
+            <td>Eᵢⱼ ≥ 5（至少80%格）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <div style="text-align:center;padding:16px 0;font-size:.78rem;color:#a0aec0">
+    114-2 進階社會統計 · ANOVA &amp; 卡方檢定 · 期中考複習 · 王晉謙
+  </div>
+
+</div><!-- end main -->
+
+<script>
+// ──────────────────────────────────
+//  WIZARD
+// ──────────────────────────────────
+var wizardState = { q1: null, q2: null };
+
+function pick1(val){
+  wizardState.q1 = val;
+  document.getElementById('btn-cont').className = 'q-btn' + (val==='cont' ? ' sel-anova' : '');
+  document.getElementById('btn-cat').className  = 'q-btn' + (val==='cat'  ? ' sel-chi2'  : '');
+
+  document.getElementById('q2a-block').style.display = val==='cont' ? 'block' : 'none';
+  document.getElementById('q2b-block').style.display = val==='cat'  ? 'block' : 'none';
+  document.getElementById('result-area').innerHTML = '';
+  wizardState.q2 = null;
+  resetQ2Btns();
+  document.getElementById('reset-btn').style.display = 'inline-block';
+}
+
+function pick2a(val){
+  wizardState.q2 = val;
+  resetQ2Btns();
+  document.getElementById('btn-oneway').className = 'q-btn' + (val==='oneway' ? ' sel-oneway' : '');
+  document.getElementById('btn-twoway').className = 'q-btn' + (val==='twoway' ? ' sel-twoway' : '');
+  showResult(val);
+}
+
+function pick2b(val){
+  wizardState.q2 = val;
+  resetQ2Btns();
+  document.getElementById('btn-gof').className   = 'q-btn' + (val==='gof'   ? ' sel-gof'   : '');
+  document.getElementById('btn-indep').className = 'q-btn' + (val==='indep' ? ' sel-indep' : '');
+  showResult(val);
+}
+
+function resetQ2Btns(){
+  ['btn-oneway','btn-twoway','btn-gof','btn-indep'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.className = 'q-btn';
+  });
+}
+
+var results = {
+  oneway: {
+    cls: 'rc-oneway',
+    color: '#3182ce',
+    btnCls: 'go-btn go-btn-oneway',
+    title: '📐 單因子 ANOVA',
+    sub: '一個類別自變數（≥3組）',
+    hint: '連續依變數 + 類別自變數（k≥3組）。<br>核心：比較各組平均數，計算 <code>F = MSB / MSW</code>。<br>若顯著 → 做後驗比較（Tukey / Bonferroni）。<br>Stata：<code>oneway y x, tabulate</code>',
+    card: 'card-oneway'
+  },
+  twoway: {
+    cls: 'rc-twoway',
+    color: '#805ad5',
+    btnCls: 'go-btn go-btn-twoway',
+    title: '🔀 二因子 ANOVA',
+    sub: '兩個類別自變數 + 交互作用',
+    hint: '兩個自變數，需同時檢定主效果 A、主效果 B、及交互作用 A×B。<br><strong>先看交互！</strong>若交互顯著，畫互動圖再解讀主效果。<br>Stata：<code>anova y a##b</code>',
+    card: 'card-twoway'
+  },
+  gof: {
+    cls: 'rc-gof',
+    color: '#dd6b20',
+    btnCls: 'go-btn go-btn-gof',
+    title: '📊 χ² 適合度檢定',
+    sub: 'Goodness-of-Fit',
+    hint: '單一類別變數，檢定其分布是否符合理論比例。<br>期望次數：<code>Eᵢ = n × pᵢ₀</code>；自由度：<code>df = k−1</code>。<br>Stata：<code>csgof var, expperc(...)</code>',
+    card: 'card-gof'
+  },
+  indep: {
+    cls: 'rc-indep',
+    color: '#2c7a7b',
+    btnCls: 'go-btn go-btn-indep',
+    title: '🔗 χ² 獨立性／同質性檢定',
+    sub: 'Independence / Homogeneity',
+    hint: '兩個類別變數，檢定是否有關聯。<br>期望次數：<code>Eᵢⱼ = (列總和 × 行總和) / n</code>；自由度：<code>df=(R-1)(C-1)</code>。<br>若顯著 → 計算標準化殘差 <code>SR=(O-E)/√E</code>。<br>Stata：<code>tabulate x y, chi2 expected</code>',
+    card: 'card-indep'
+  }
+};
+
+function showResult(type){
+  var r = results[type];
+  var html = '<div class="wizard-arrow">↓</div>'
+    + '<div class="result-card ' + r.cls + ' show">'
+    + '<div class="result-title" style="color:' + r.color + '">' + r.title + ' <span>' + r.sub + '</span></div>'
+    + '<div class="result-hint">' + r.hint + '</div>'
+    + '<button class="' + r.btnCls + '" onclick="jumpToCard(\'' + r.card + '\')" style="font-family:inherit">▶ 展開詳細框架</button>'
+    + '</div>';
+  document.getElementById('result-area').innerHTML = html;
+}
+
+function jumpToCard(cardId){
+  var card = document.getElementById(cardId);
+  if(!card) return;
+  // highlight
+  document.querySelectorAll('.method-card').forEach(function(c){ c.classList.remove('highlight'); });
+  card.classList.add('highlight');
+  // open
+  if(!card.classList.contains('open')) card.classList.add('open');
+  // scroll
+  setTimeout(function(){ card.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+}
+
+function resetWizard(){
+  wizardState = { q1: null, q2: null };
+  ['btn-cont','btn-cat'].forEach(function(id){ document.getElementById(id).className='q-btn'; });
+  resetQ2Btns();
+  document.getElementById('q2a-block').style.display='none';
+  document.getElementById('q2b-block').style.display='none';
+  document.getElementById('result-area').innerHTML='';
+  document.getElementById('reset-btn').style.display='none';
+  document.querySelectorAll('.method-card').forEach(function(c){ c.classList.remove('highlight'); });
+}
+
+// ──────────────────────────────────
+//  CARDS toggle
+// ──────────────────────────────────
+function toggleCard(id){
+  var card = document.getElementById('card-' + id);
+  if(!card) return;
+  card.classList.toggle('open');
+}
+
+// ──────────────────────────────────
+//  TABS
+// ──────────────────────────────────
+function showTab(cardId, tabName, btnEl){
+  // hide all panes in this card
+  var card = document.getElementById('card-' + cardId);
+  card.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  card.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  // show target
+  var pane = document.getElementById('tab-' + cardId + '-' + tabName);
+  if(pane) pane.classList.add('active');
+  if(btnEl) btnEl.classList.add('active');
+}
+
+// ──────────────────────────────────
+//  Auto-open first card on load
+// ──────────────────────────────────
+// (cards start closed, user opens by clicking)
+</script>
+</body>
+</html>
