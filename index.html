@@ -408,7 +408,8 @@ F    = MSB / MSW   ← F ~ F(dfB, dfW)
       <div class="mc-body">
         <div class="tab-bar bg-purple">
           <button class="tab-btn active" onclick="showTab('twoway','concept',this)">💡 概念</button>
-          <button class="tab-btn" onclick="showTab('twoway','steps',this)">📐 步驟</button>
+          <button class="tab-btn" onclick="showTab('twoway','steps',this)">📐 步驟 &amp; SS公式</button>
+          <button class="tab-btn" onclick="showTab('twoway','example',this)">🔢 計算例子</button>
           <button class="tab-btn" onclick="showTab('twoway','stata',this)">💻 Stata</button>
         </div>
 
@@ -418,47 +419,223 @@ F    = MSB / MSW   ← F ~ F(dfB, dfW)
           <div class="hypo-box">
             <p class="h0">H₀ₐ：A 無主效果（各 A 組平均相等）</p>
             <p class="h0">H₀ᵦ：B 無主效果（各 B 組平均相等）</p>
-            <p class="h0">H₀ₐᵦ：A×B 無交互作用</p>
+            <p class="h0">H₀ₐᵦ：A×B 無交互作用（兩條線平行）</p>
+            <p style="margin-top:6px;font-size:.82rem;color:#4a5568">三組假設各自獨立，需分別檢定，各自有 F 值</p>
           </div>
           <div class="formula-box">
+<span class="comment">── 變異量分解 ──</span>
 SST = SS_A + SS_B + SS_AB + SS_error
-df_A   = a − 1
-df_B   = b − 1
+
+<span class="comment">── 自由度 ──</span>
+df_A   = a − 1          <span class="comment">← a = A 的水準數</span>
+df_B   = b − 1          <span class="comment">← b = B 的水準數</span>
 df_AB  = (a−1)(b−1)
-df_err = ab(n−1)   <span class="comment">← n = 每細格樣本數</span>
-F_A   = MS_A  / MS_err
-F_B   = MS_B  / MS_err
-F_AB  = MS_AB / MS_err
+df_err = ab(n−1)        <span class="comment">← n = 每細格樣本數</span>
+df_T   = N − 1 = abn − 1
+
+<span class="comment">── F 統計量（三個都除以同一個 MS_error）──</span>
+F_A   = MS_A  / MS_error
+F_B   = MS_B  / MS_error
+F_AB  = MS_AB / MS_error
 </div>
           <div class="note-box">⚠️ <strong>先看交互作用！</strong>若 F_AB 顯著，A、B 的主效果解釋需謹慎，應畫交互作用圖（Interaction Plot）來解釋。</div>
           <div class="purple-box"><strong>交互作用的意思：</strong>A 對 Y 的影響因 B 的不同而不同（反之亦然）。圖上兩條線若非平行即有交互作用。</div>
         </div>
 
-        <!-- 步驟 -->
+        <!-- 步驟 + SS公式 -->
         <div class="tab-pane bg-purple" id="tab-twoway-steps">
+          <p style="font-size:.82rem;color:#4a5568;margin-bottom:14px">符號定義：<strong>a</strong>=A水準數、<strong>b</strong>=B水準數、<strong>n</strong>=每格樣本數、<strong>N=abn</strong>；Tᵢⱼ=格子加總、Tᵢ.=A第i列加總、T.ⱼ=B第j行加總、T..=全體加總</p>
+
           <ol class="step-list">
-            <li class="step-item"><div class="snum">1</div><div class="stext">設三組假設（主效果 A、主效果 B、交互 A×B）</div></li>
-            <li class="step-item"><div class="snum">2</div><div class="stext">計算各細格（Cell）平均數</div></li>
-            <li class="step-item"><div class="snum">3</div><div class="stext">分解變異：SS_A, SS_B, SS_AB, SS_error</div></li>
-            <li class="step-item"><div class="snum">4</div><div class="stext">計算各 F 值（分別對 MS_error）</div></li>
-            <li class="step-item"><div class="snum">5</div><div class="stext"><strong>先判斷交互作用</strong>，若顯著畫互動圖、做 Simple Effects 分析</div></li>
-            <li class="step-item"><div class="snum">6</div><div class="stext">若無交互，再解釋主效果</div></li>
+            <li class="step-item"><div class="snum">1</div><div class="stext"><strong>設定三組假設</strong>（主效果 A、主效果 B、交互 A×B），設 α=.05</div></li>
+
+            <li class="step-item"><div class="snum">2</div><div class="stext">
+              <strong>整理資料：計算各格加總 Tᵢⱼ 與各邊際加總</strong>
+              <div class="formula-box" style="margin-top:8px;font-size:.8rem">
+Tᵢ.  = Σⱼ Tᵢⱼ   <span class="comment">← 第 i 列（A 第 i 水準）的所有格加總</span>
+T.ⱼ  = Σᵢ Tᵢⱼ   <span class="comment">← 第 j 行（B 第 j 水準）的所有格加總</span>
+T..  = Σᵢ Σⱼ Tᵢⱼ <span class="comment">← 全體總加總</span>
+</div>
+            </div></li>
+
+            <li class="step-item"><div class="snum">3</div><div class="stext">
+              <strong>計算校正因子 CF（Correction Factor）</strong>
+              <div class="formula-box" style="margin-top:8px">CF = T².. / N</div>
+              <span style="font-size:.82rem;color:#4a5568">CF 是所有後續 SS 計算的基準，先算好備用</span>
+            </div></li>
+
+            <li class="step-item"><div class="snum">4</div><div class="stext">
+              <strong>計算 SST（全體變異）</strong>
+              <div class="formula-box" style="margin-top:8px">SST = Σᵢ Σⱼ Σₖ x²ᵢⱼₖ − CF</div>
+              把每一個原始觀測值平方後加總，再減 CF
+            </div></li>
+
+            <li class="step-item"><div class="snum">5</div><div class="stext">
+              <strong>計算 SS_A（因子 A 的主效果變異）</strong>
+              <div class="formula-box" style="margin-top:8px">SS_A = Σᵢ Tᵢ.² / (bn) − CF</div>
+              用 A 各水準的<em>列加總</em>平方後除以「每列格數×每格n」，再減 CF
+            </div></li>
+
+            <li class="step-item"><div class="snum">6</div><div class="stext">
+              <strong>計算 SS_B（因子 B 的主效果變異）</strong>
+              <div class="formula-box" style="margin-top:8px">SS_B = Σⱼ T.ⱼ² / (an) − CF</div>
+              用 B 各水準的<em>行加總</em>平方後除以「每行格數×每格n」，再減 CF
+            </div></li>
+
+            <li class="step-item"><div class="snum">7</div><div class="stext">
+              <strong>計算 SS_cells（各格細格變異）</strong>
+              <div class="formula-box" style="margin-top:8px">SS_cells = Σᵢ Σⱼ Tᵢⱼ² / n − CF</div>
+              用每個格子加總平方後除以 n，加總後減 CF
+            </div></li>
+
+            <li class="step-item"><div class="snum">8</div><div class="stext">
+              <strong>計算 SS_AB（交互作用變異）← 關鍵！</strong>
+              <div class="formula-box" style="margin-top:8px">SS_AB = SS_cells − SS_A − SS_B</div>
+              <span style="color:#805ad5;font-weight:600">細格變異扣掉兩個主效果，剩下的就是交互作用</span>
+            </div></li>
+
+            <li class="step-item"><div class="snum">9</div><div class="stext">
+              <strong>計算 SS_error（誤差）</strong>
+              <div class="formula-box" style="margin-top:8px">SS_error = SST − SS_cells</div>
+              也可用：SST − SS_A − SS_B − SS_AB
+            </div></li>
+
+            <li class="step-item"><div class="snum">10</div><div class="stext">
+              <strong>計算 MS 與 F</strong>
+              <div class="formula-box" style="margin-top:8px">
+MS_A   = SS_A   / df_A
+MS_B   = SS_B   / df_B
+MS_AB  = SS_AB  / df_AB
+MS_err = SS_err / df_err
+
+F_A   = MS_A   / MS_err
+F_B   = MS_B   / MS_err
+F_AB  = MS_AB  / MS_err
+</div>
+            </div></li>
+
+            <li class="step-item"><div class="snum">11</div><div class="stext">
+              <strong>決策順序：先交互，後主效果</strong><br>
+              ① 若 F_AB 顯著 → 畫互動圖，做 Simple Effects 分析，主效果解釋需謹慎<br>
+              ② 若 F_AB 不顯著 → 再解讀 F_A 與 F_B 的主效果
+            </div></li>
           </ol>
+
+          <table class="atable">
+            <tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F</th></tr>
+            <tr><td>因子 A</td><td>SS_A</td><td>a−1</td><td>MS_A</td><td>MS_A/MS_err</td></tr>
+            <tr><td>因子 B</td><td>SS_B</td><td>b−1</td><td>MS_B</td><td>MS_B/MS_err</td></tr>
+            <tr><td>A×B 交互</td><td>SS_AB</td><td>(a−1)(b−1)</td><td>MS_AB</td><td class="hi">MS_AB/MS_err</td></tr>
+            <tr><td>誤差</td><td>SS_err</td><td>ab(n−1)</td><td>MS_err</td><td>—</td></tr>
+            <tr><td><strong>全體</strong></td><td>SST</td><td>N−1</td><td>—</td><td>—</td></tr>
+          </table>
+        </div>
+
+        <!-- 計算例子 -->
+        <div class="tab-pane bg-purple" id="tab-twoway-example">
+          <div class="ex-box" style="background:#faf5ff;border-color:#d6bcfa;border-left-color:#805ad5">
+            <div class="ex-title">🔢 完整數字範例</div>
+            <p><strong>研究問題：</strong>教學法（A：傳統/互動，a=2）與班型（B：小班/大班，b=2）對學生成績（Y）的影響，每格 n=3，N=12</p>
+          </div>
+
+          <p style="font-size:.85rem;font-weight:700;margin:14px 0 8px">Step 1：各格原始資料與加總</p>
+          <table class="atable">
+            <tr><th>　</th><th>B₁ 小班</th><th>B₂ 大班</th><th>Tᵢ.（列加總）</th></tr>
+            <tr><td><strong>A₁ 傳統</strong></td><td>8, 7, 6<br><em>T₁₁=21, x̄=7</em></td><td>4, 5, 3<br><em>T₁₂=12, x̄=4</em></td><td><strong>T₁.= 33</strong></td></tr>
+            <tr><td><strong>A₂ 互動</strong></td><td>6, 7, 8<br><em>T₂₁=21, x̄=7</em></td><td>9, 10, 8<br><em>T₂₂=27, x̄=9</em></td><td><strong>T₂.= 48</strong></td></tr>
+            <tr><td><strong>T.ⱼ（行加總）</strong></td><td><strong>T.₁= 42</strong></td><td><strong>T.₂= 39</strong></td><td><strong>T..= 81</strong></td></tr>
+          </table>
+
+          <p style="font-size:.85rem;font-weight:700;margin:14px 0 8px">Step 2：計算 CF 與 SST</p>
+          <div class="formula-box" style="font-size:.82rem">
+CF  = T².. / N = 81² / 12 = 6561 / 12 = <strong>546.75</strong>
+
+Σx² = (8²+7²+6²) + (4²+5²+3²) + (6²+7²+8²) + (9²+10²+8²)
+    = 149 + 50 + 149 + 245 = <strong>593</strong>
+
+SST = 593 − 546.75 = <strong>46.25</strong>
+</div>
+
+          <p style="font-size:.85rem;font-weight:700;margin:14px 0 8px">Step 3：計算各 SS（核心）</p>
+          <div class="formula-box" style="font-size:.82rem">
+<span class="comment">── SS_A（用列加總 Tᵢ.，每列有 b×n=6 個觀測）──</span>
+SS_A = (T₁.² + T₂.²) / (bn) − CF
+     = (33² + 48²) / (2×3) − 546.75
+     = (1089 + 2304) / 6 − 546.75
+     = 565.50 − 546.75 = <strong>18.75</strong>
+
+<span class="comment">── SS_B（用行加總 T.ⱼ，每行有 a×n=6 個觀測）──</span>
+SS_B = (T.₁² + T.₂²) / (an) − CF
+     = (42² + 39²) / (2×3) − 546.75
+     = (1764 + 1521) / 6 − 546.75
+     = 547.50 − 546.75 = <strong>0.75</strong>
+
+<span class="comment">── SS_cells（用各格加總 Tᵢⱼ，每格有 n=3 個觀測）──</span>
+SS_cells = (T₁₁² + T₁₂² + T₂₁² + T₂₂²) / n − CF
+         = (21² + 12² + 21² + 27²) / 3 − 546.75
+         = (441 + 144 + 441 + 729) / 3 − 546.75
+         = 1755 / 3 − 546.75
+         = 585.00 − 546.75 = <strong>38.25</strong>
+
+<span class="comment">── SS_AB（細格變異扣主效果）──</span>
+SS_AB  = SS_cells − SS_A − SS_B
+       = 38.25 − 18.75 − 0.75 = <strong>18.75</strong>
+
+<span class="comment">── SS_error ──</span>
+SS_err = SST − SS_cells
+       = 46.25 − 38.25 = <strong>8.00</strong>
+</div>
+
+          <p style="font-size:.85rem;font-weight:700;margin:14px 0 8px">Step 4：ANOVA 表</p>
+          <table class="atable">
+            <tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F</th><th>結論</th></tr>
+            <tr><td>因子 A（教學法）</td><td>18.75</td><td>1</td><td>18.75</td><td class="hi">18.75*</td><td>顯著</td></tr>
+            <tr><td>因子 B（班型）</td><td>0.75</td><td>1</td><td>0.75</td><td>0.75</td><td>不顯著</td></tr>
+            <tr><td>A×B 交互</td><td>18.75</td><td>1</td><td>18.75</td><td class="hi">18.75*</td><td>顯著！</td></tr>
+            <tr><td>誤差</td><td>8.00</td><td>8</td><td>1.00</td><td>—</td><td>—</td></tr>
+            <tr><td><strong>全體</strong></td><td>46.25</td><td>11</td><td>—</td><td>—</td><td>—</td></tr>
+          </table>
+          <p style="font-size:.8rem;color:#4a5568;margin-top:6px">* F*(1, 8, α=.05) = 5.32；F=18.75 &gt; 5.32 → 顯著</p>
+
+          <div class="purple-box" style="margin-top:14px">
+            <strong>解讀：</strong>A×B 交互作用顯著！→ 教學法的效果因班型不同而不同。<br>
+            • 傳統教法：小班(x̄=7) &gt; 大班(x̄=4)　→ 小班效果好<br>
+            • 互動教法：大班(x̄=9) &gt; 小班(x̄=7)　→ 大班效果反而更好<br>
+            → 因為有交互，不能單純說「互動教法比傳統好」，要分班型說明！
+          </div>
+          <div class="note-box" style="margin-top:8px">⚠️ df 驗算：df_A + df_B + df_AB + df_err = 1+1+1+8 = 11 = N−1 ✓</div>
         </div>
 
         <!-- Stata -->
         <div class="tab-pane bg-purple" id="tab-twoway-stata">
           <div class="stata-block">
-<span class="s-cmt">* ─── 二因子 ANOVA（含交互項）───</span>
-<span class="s-cmd">anova</span> <span class="s-var">income</span> <span class="s-var">gender</span>##<span class="s-var">region</span>
+<span class="s-cmt">* ─── 二因子 ANOVA（含交互項）── ## 是最常用寫法 ──</span>
+<span class="s-cmd">anova</span> <span class="s-var">score</span> <span class="s-var">method</span>##<span class="s-var">classtype</span>
 
-<span class="s-cmt">* ─── 等同寫法 ───</span>
-<span class="s-cmd">anova</span> <span class="s-var">income</span> <span class="s-var">gender</span> <span class="s-var">region</span> <span class="s-var">gender</span>#<span class="s-var">region</span>
+<span class="s-cmt">* ─── 等同寫法（明確列出交互項）───</span>
+<span class="s-cmd">anova</span> <span class="s-var">score</span> <span class="s-var">method</span> <span class="s-var">classtype</span> <span class="s-var">method</span>#<span class="s-var">classtype</span>
 
-<span class="s-cmt">* ─── 邊際平均數與互動圖 ───</span>
-<span class="s-cmd">margins</span> <span class="s-var">gender</span>#<span class="s-var">region</span>
+<span class="s-cmt">* ─── 查看各細格平均數 ───</span>
+<span class="s-cmd">tabstat</span> <span class="s-var">score</span>, <span class="s-opt">by</span>(<span class="s-var">method</span>) <span class="s-opt">stat(mean n)</span>
+<span class="s-cmd">table</span> <span class="s-var">method</span> <span class="s-var">classtype</span>, <span class="s-opt">stat(mean score)</span>
+
+<span class="s-cmt">* ─── 邊際平均數 ───</span>
+<span class="s-cmd">margins</span> <span class="s-var">method</span>#<span class="s-var">classtype</span>
+
+<span class="s-cmt">* ─── 互動圖（交互作用顯著時必畫）───</span>
 <span class="s-cmd">marginsplot</span>
+
+<span class="s-cmt">* ─── Simple Effects（交互顯著後的後續分析）───</span>
+<span class="s-cmt">* 固定 B=小班，看 A 的效果</span>
+<span class="s-cmd">margins</span> <span class="s-var">method</span>, <span class="s-opt">at</span>(<span class="s-var">classtype</span>=<span class="s-num">1</span>)
+<span class="s-cmd">margins</span> <span class="s-var">method</span>, <span class="s-opt">at</span>(<span class="s-var">classtype</span>=<span class="s-num">2</span>)
 </div>
+          <div class="ex-box" style="background:#faf5ff;border-color:#d6bcfa;border-left-color:#805ad5">
+            <div class="ex-title">⚠️ 注意事項</div>
+            <p>• <code>##</code> 包含主效果與交互，<code>#</code> 只有交互項本身</p>
+            <p>• 交互作用顯著 → <code>marginsplot</code> 畫圖是解釋的關鍵</p>
+            <p>• 若各格樣本數不等（unbalanced design），SS 的計算方式不同，需用 Type III SS</p>
+          </div>
         </div>
       </div>
     </div><!-- end card twoway -->
