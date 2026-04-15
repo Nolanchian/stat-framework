@@ -255,7 +255,7 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
   <div class="page-header-overlay"></div>
   <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDark()">🌙 深色</button>
   <div class="page-header-content">
-    <h1>📊📈 社會統計總複習</h1>
+    <h1 style="font-size:2.2rem">社會統計總複習</h1>
     <p>114學年度社會統計複習・王晉謙 Nolan Wang</p>
     <div class="tags">
       <span class="tag">後驗比較</span>
@@ -1756,6 +1756,9 @@ function showResultCard(type) {
     goBtn.setAttribute('onclick', "jumpToCard('" + r.card + "')");
     area.style.display = 'block';
     document.getElementById('result-wrapper').style.display = 'block';
+    if (window.renderMathInElement) {
+        renderMathInElement(area, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
+    }
 }
 
 // 8. 自動跳轉並展開
