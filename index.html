@@ -76,6 +76,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto
 .go-btn-gof{background:#dd6b20}
 .go-btn-indep{background:#2c7a7b}
 .go-btn-reg{background:#4f46e5}
+.go-btn-single{background:#5b21b6}
+.result-card.rc-single{border-color:#5b21b6;background:#f5f3ff}
 
 .reset-btn{margin-top:14px;background:none;border:1px solid #e2e8f0;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;color:#718096;font-family:inherit}
 .reset-btn:hover{background:#f7fafc;color:#4a5568}
@@ -205,6 +207,7 @@ body.dark .result-card.rc-twoway{background:#1e1030}
 body.dark .result-card.rc-gof{background:#2d1a08}
 body.dark .result-card.rc-indep{background:#0a2020}
 body.dark .result-card.rc-reg{background:#1a1a3a}
+body.dark .result-card.rc-single{background:#1e1030}
 body.dark .result-title{color:#e2e8f0}
 body.dark .result-hint{color:#cbd5e0}
 
@@ -1678,6 +1681,12 @@ var results = {
         hint: '估計母體平均數或比例的範圍。<br>CI：點估計 ± 臨界值 × SE。<br>單母體 t：<code>t = (x̄ − μ₀) / (s/√n)</code>，df = n−1。<br>Stata：<code>ci means y</code>、<code>ttest y == μ₀</code>',
         card: 'card-ci'
     },
+    'single': {
+        cls: 'rc-single', color: '#5b21b6', btnCls: 'go-btn go-btn-single',
+        title: '🔢 單母體假設檢定', sub: 'z 檢定 / t 檢定 / 比例檢定',
+        hint: '單一母體，檢定平均數或比例是否等於某假設值。<br>σ 已知或比例 → z 檢定；σ 未知 → t 檢定（df = n−1）。<br>Stata：<code>ttest y == μ₀</code>、<code>ztest y == μ₀</code>',
+        card: 'card-single'
+    },
     'double': {
         cls: 'rc-twoway', color: '#805ad5', btnCls: 'go-btn go-btn-twoway',
         title: '👥 雙母體 t 檢定', sub: '2 個母體，連續 DV',
@@ -1718,7 +1727,7 @@ var results = {
 
 // 5. 決策嚮導：第二步 (連續變數的母體數)
 function pick2_cont(num) {
-    var type = { '1': 'ci', '2': 'double', '3': 'oneway', '4': 'twoway', '5': 'reg' }[num];
+    var type = { '1': 'single', '2': 'double', '3': 'oneway', '4': 'twoway', '5': 'reg' }[num];
     showResultCard(type);
     document.getElementById('q2-cont-block').style.display = 'block';
     document.getElementById('q2-cat-block').style.display = 'none';
