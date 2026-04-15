@@ -272,7 +272,23 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
   <div class="sec-title"><span>🧭 我遇到什麼題目？— 決策嚮導</span></div>
   <div class="panel">
     <div class="wizard-body">
- <p class="wizard-lead">從<strong>推論目的</strong>出發，一步步找出正確的分析框架。<br><small style="color:#718096">描述統計 → 抽樣分配 → <strong style="color:#3182ce">推論統計</strong>（估計 ／ 假設檢定）</small></p>
+ <p class="wizard-lead">從<strong>推論目的</strong>出發，一步步找出正確的分析框架。</p>
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px;background:#f7fafc;border-radius:10px;padding:12px 16px;border-left:4px solid #718096">
+        <div style="font-size:.72rem;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">描述統計</div>
+        <div style="font-size:.85rem;color:#2d3748;line-height:1.6">用<strong>樣本</strong>計算統計量（$\bar{x}$、$s$、中位數⋯），描述資料本身的分布與特徵。<strong>不做推論。</strong></div>
+      </div>
+      <div style="display:flex;align-items:center;color:#a0aec0;font-size:1.2rem">→</div>
+      <div style="flex:1;min-width:180px;background:#f7fafc;border-radius:10px;padding:12px 16px;border-left:4px solid #805ad5">
+        <div style="font-size:.72rem;font-weight:700;color:#805ad5;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">抽樣分配</div>
+        <div style="font-size:.85rem;color:#2d3748;line-height:1.6">若重複抽樣，$\bar{x}$ 本身也有分配。由<strong>中央極限定理</strong>保證：$n$ 夠大時 $\bar{x} \sim N(\mu,\,\sigma^2/n)$。這是跨入推論的橋樑。</div>
+      </div>
+      <div style="display:flex;align-items:center;color:#a0aec0;font-size:1.2rem">→</div>
+      <div style="flex:1;min-width:180px;background:#ebf8ff;border-radius:10px;padding:12px 16px;border-left:4px solid #3182ce">
+        <div style="font-size:.72rem;font-weight:700;color:#3182ce;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">推論統計</div>
+        <div style="font-size:.85rem;color:#2d3748;line-height:1.6">用樣本統計量<strong>推估母體參數</strong>。分為：<strong>估計</strong>（CI）與<strong>假設檢定</strong>（z / t / F / χ²）。</div>
+      </div>
+    </div>
 
     <div class="q-block" id="q0-block">
         <div class="q-label">第 1 步</div>
