@@ -262,10 +262,24 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
   <div class="sec-title"><span>🧭 我遇到什麼題目？— 決策嚮導</span></div>
   <div class="panel">
     <div class="wizard-body">
- <p class="wizard-lead">根據題目目的與<strong>資料型態</strong>，一步步找出正確的分析框架。</p>
+ <p class="wizard-lead">從<strong>推論目的</strong>出發，一步步找出正確的分析框架。<br><small style="color:#718096">描述統計 → 抽樣分配 → <strong style="color:#3182ce">推論統計</strong>（估計 ／ 假設檢定）</small></p>
 
-    <div class="q-block active" id="q1-block">
+    <div class="q-block" id="q0-block">
         <div class="q-label">第 1 步</div>
+        <div class="q-text">你的推論統計目的是？</div>
+        <div class="btn-group">
+            <button class="q-btn" onclick="pick0('est')">
+                <b>📐 估計</b><br><small>想知道母體參數可能落在哪個範圍</small>
+            </button>
+            <button class="q-btn" onclick="pick0('test')">
+                <b>🔍 假設檢定</b><br><small>想驗證某個假設是否成立</small>
+            </button>
+        </div>
+    </div>
+
+    <div class="q-block" id="q1-block" style="display:none;">
+        <div class="wizard-arrow">↓</div>
+        <div class="q-label">第 2 步</div>
         <div class="q-text">你的依變數 (Y) 是什麼類型？</div>
         <div class="btn-group">
             <button class="q-btn" id="btn-cont" onclick="pick1('cont')">
@@ -279,7 +293,7 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
 
     <div class="q-block" id="q2-cont-block" style="display:none;">
         <div class="wizard-arrow">↓</div>
-        <div class="q-label">第 2 步</div>
+        <div class="q-label">第 3 步</div>
         <div class="q-text">你有幾個母體／自變數？</div>
         <div class="btn-group">
             <button class="q-btn" onclick="pick2_cont('1')">1 個母體</button>
@@ -291,9 +305,9 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
     </div>
 
     <div class="q-block" id="q2-cat-block" style="display:none;">
-      
+
         <div class="wizard-arrow">↓</div>
-        <div class="q-label">第 2 步</div>
+        <div class="q-label">第 3 步</div>
         <div class="q-text">你的研究問題是？</div>
         <div class="btn-group">
             <button class="q-btn" onclick="showResult('gof')">分配符合理論嗎？</button>
@@ -1632,7 +1646,16 @@ function showTab(cardId, tabName, btnEl) {
     btnEl.classList.add('active');
 }
 
-// 3. 決策嚮導：第一步 (連續 vs 類別)
+// 3. 決策嚮導：第零步 (估計 vs 假設檢定)
+function pick0(type) {
+    document.getElementById('q1-block').style.display = (type === 'test') ? 'block' : 'none';
+    document.getElementById('q2-cont-block').style.display = 'none';
+    document.getElementById('q2-cat-block').style.display = 'none';
+    document.getElementById('result-wrapper').style.display = 'none';
+    if (type === 'est') { showResultCard('ci'); }
+}
+
+// 3b. 決策嚮導：第二步 (連續 vs 類別)
 function pick1(type) {
     document.getElementById('q1-block').style.display = 'block';
     document.getElementById('q2-cont-block').style.display = (type === 'cont') ? 'block' : 'none';
@@ -1732,7 +1755,8 @@ function jumpToCard(id) {
 
 // 9. 重置
 function resetWizard() {
-    document.getElementById('q1-block').style.display = 'block';
+    document.getElementById('q0-block').style.display = 'block';
+    document.getElementById('q1-block').style.display = 'none';
     document.getElementById('q2-cont-block').style.display = 'none';
     document.getElementById('q2-cat-block').style.display = 'none';
     document.getElementById('result-wrapper').style.display = 'none';
