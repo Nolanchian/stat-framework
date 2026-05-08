@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>社會統計總複習</title>
-<meta name="description" content="信賴區間 (CI)・單母體假設檢定・雙母體假設檢定・單因子 ANOVA・二因子 ANOVA・χ² 適合度檢定・χ² 獨立性／同質性檢定・迴歸分析 (OLS)">
+<meta name="description" content="信賴區間 (CI)・單母體假設檢定・雙母體假設檢定・單因子 ANOVA・二因子 ANOVA・χ² 適合度檢定・χ² 獨立性／同質性檢定・單迴歸・多元迴歸・統計控制・淨相關係數">
 <meta property="og:title" content="社會統計總複習">
-<meta property="og:description" content="信賴區間 (CI)・單母體假設檢定・雙母體假設檢定・單因子 ANOVA・二因子 ANOVA・χ² 適合度檢定・χ² 獨立性／同質性檢定・迴歸分析 (OLS)">
+<meta property="og:description" content="信賴區間 (CI)・單母體假設檢定・雙母體假設檢定・單因子 ANOVA・二因子 ANOVA・χ² 適合度檢定・χ² 獨立性／同質性檢定・單迴歸・多元迴歸・統計控制・淨相關係數">
 <meta property="og:image" content="https://nolanchian.github.io/stat-framework/hero.png">
 <meta property="og:url" content="https://nolanchian.github.io/stat-framework/">
 <meta property="og:type" content="website">
@@ -67,6 +67,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto
 .result-card.rc-gof{border-color:#dd6b20;background:#fff7ed}
 .result-card.rc-indep{border-color:#2c7a7b;background:#e6fffa}
 .result-card.rc-reg{border-color:#4f46e5;background:#eef2ff}
+.result-card.rc-simp{border-color:#0369a1;background:#e0f2fe}
+.result-card.rc-ctrl{border-color:#9333ea;background:#faf5ff}
 .result-title{font-size:1.05rem;font-weight:800;margin-bottom:6px;color:#1a202c}
 .result-hint{font-size:.9rem;color:#2d3748;line-height:1.7;font-weight:600}
 .go-btn{display:inline-block;margin-top:10px;padding:7px 20px;border-radius:8px;border:none;color:#fff;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;transition:filter .2s}
@@ -77,6 +79,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto
 .go-btn-indep{background:#2c7a7b}
 .go-btn-reg{background:#4f46e5}
 .go-btn-single{background:#5b21b6}
+.go-btn-simp{background:#0369a1}
+.go-btn-ctrl{background:#9333ea}
 .result-card.rc-single{border-color:#5b21b6;background:#f5f3ff}
 
 .reset-btn{margin-top:14px;background:none;border:1px solid #e2e8f0;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;color:#718096;font-family:inherit}
@@ -165,7 +169,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto
 
 /* Color utilities */
 .c-blue{color:#3182ce}.c-green{color:#38a169}.c-orange{color:#dd6b20}.c-teal{color:#2c7a7b}.c-purple{color:#805ad5}
-.bg-blue{--c:#3182ce}.bg-purple{--c:#805ad5}.bg-orange{--c:#dd6b20}.bg-teal{--c:#2c7a7b}.bg-reg{--c:#4f46e5}
+.bg-blue{--c:#3182ce}.bg-purple{--c:#805ad5}.bg-orange{--c:#dd6b20}.bg-teal{--c:#2c7a7b}.bg-reg{--c:#4f46e5}.bg-simp{--c:#0369a1}.bg-ctrl{--c:#9333ea}
 
 /* ─── Badge ─── */
 .badge{display:inline-block;padding:1px 9px;border-radius:12px;font-size:.72rem;font-weight:700}
@@ -221,6 +225,8 @@ body.dark .result-card.rc-gof{background:#2d1a08}
 body.dark .result-card.rc-indep{background:#0a2020}
 body.dark .result-card.rc-reg{background:#1a1a3a}
 body.dark .result-card.rc-single{background:#1e1030}
+body.dark .result-card.rc-simp{background:#0c2a40}
+body.dark .result-card.rc-ctrl{background:#261040}
 body.dark .result-title{color:#e2e8f0}
 body.dark .result-hint{color:#cbd5e0}
 
@@ -241,6 +247,10 @@ body.dark .ex-box.ex-orange{background:#2d1a08}
 body.dark .ex-box.ex-teal{background:#0a2020}
 body.dark .note-box{background:#2d1515;border-color:#9b2c2c;color:#feb2b2}
 body.dark .tip-box{background:#0f2d1a;border-color:#276749;color:#9ae6b4}
+body.dark #card-simp .concept-box,body.dark #card-ctrl .concept-box{color:#cbd5e0 !important}
+body.dark #card-simp .concept-box:nth-child(1){background:#0c2a40 !important}
+body.dark #card-simp .concept-box:nth-child(2){background:#0f2d1a !important}
+body.dark #card-simp .concept-box:nth-child(3){background:#2d1a08 !important}
 body.dark .purple-box{background:#1e1030;border-color:#805ad5;color:#d6bcfa}
 body.dark .calc-block{background:#1e1a0a;border-color:#c05621;border-left-color:#f6ad55}
 body.dark .calc-title{color:#f6ad55}
@@ -339,7 +349,8 @@ body.dark .b-teal{background:#0a2020;color:#81e6d9}
             <button class="q-btn" onclick="pick2_cont('2')">2 個母體</button>
             <button class="q-btn" onclick="pick2_cont('3')">3 組以上，<b>1 個</b>類別自變數</button>
             <button class="q-btn" onclick="pick2_cont('4')">3 組以上，<b>2 個</b>類別自變數</button>
-            <button class="q-btn" onclick="pick2_cont('5')"><b>連續</b>自變數（預測／解釋）</button>
+            <button class="q-btn" onclick="pick2_cont('5')"><b>1 個連續</b>自變數（單迴歸）</button>
+            <button class="q-btn" onclick="pick2_cont('6')"><b>多個</b>自變數（多元迴歸）</button>
         </div>
     </div>
 
@@ -1577,6 +1588,337 @@ $\beta_1 = 5$ → $X$ 每增加 1 單位，$Y$ 預期增加 5 單位（以原始
       </div>
     </div><!-- end card reg -->
 
+
+    <!-- ======== card-simp: 單迴歸分析 ======== -->
+    <div class="method-card bg-simp" id="card-simp">
+      <div class="card-header">
+        <div class="card-icon">📈</div>
+        <div>
+          <div class="card-title">單迴歸分析</div>
+          <div class="card-subtitle">Simple Linear Regression</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'simp','概念')">💡 概念</button>
+        <button class="tab-btn" onclick="switchTab(this,'simp','公式')">📐 公式／步驟</button>
+        <button class="tab-btn" onclick="switchTab(this,'simp','Stata')">💻 Stata</button>
+        <button class="tab-btn" onclick="switchTab(this,'simp','判讀')">🔍 判讀輸出</button>
+      </div>
+
+      <!-- TAB: 概念 -->
+      <div class="tab-content simp-概念 active">
+        <div class="concept-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <div class="concept-box" style="background:#e0f2fe;border-left:4px solid #0369a1">
+            <div class="concept-label" style="color:#0369a1">研究問題</div>
+            <div>X 能多好地<strong>預測</strong>或<strong>解釋</strong> Y？</div>
+          </div>
+          <div class="concept-box" style="background:#f0fdf4;border-left:4px solid #15803d">
+            <div class="concept-label" style="color:#15803d">資料尺度</div>
+            <div>依變數 Y：連續（等距／比例）<br>自變數 X：連續或虛擬變數</div>
+          </div>
+          <div class="concept-box" style="background:#fef9c3;border-left:4px solid #b45309">
+            <div class="concept-label" style="color:#b45309">適用情境</div>
+            <div>1 個自變數影響 Y<br>直線關係假設合理</div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <strong>迴歸線的意義：</strong>在所有可能的直線中，OLS（最小平方法）找出使<strong>殘差平方和最小</strong>的那條線——預測值 Ŷ 最接近實際值 Y。
+        </div>
+        <div style="margin-top:12px">
+          <strong>三種變異來源：</strong>
+          <table class="qr-table" style="margin-top:6px">
+            <tr><th>符號</th><th>名稱</th><th>意義</th></tr>
+            <tr><td><span class="mc">SST</span></td><td>總變異</td><td>Y 對整體平均 Ȳ 的偏差平方和</td></tr>
+            <tr><td><span class="mc">SSR</span></td><td>迴歸變異（可解釋）</td><td>Ŷ 對 Ȳ 的偏差平方和，由 X 解釋</td></tr>
+            <tr><td><span class="mc">SSE</span></td><td>殘差變異（不可解釋）</td><td>Y 對 Ŷ 的偏差平方和</td></tr>
+          </table>
+          <div style="margin-top:8px;text-align:center">
+            <span class="katex-formula">\text{SST} = \text{SSR} + \text{SSE}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: 公式 -->
+      <div class="tab-content simp-公式">
+        <div class="formula-box" style="margin-bottom:12px">
+          <div style="font-weight:700;color:#0369a1;margin-bottom:6px">迴歸方程式</div>
+          <div style="text-align:center;font-size:1.05rem">
+            <span class="katex-formula">\hat{Y} = b_0 + b_1 X</span>
+          </div>
+          <ul style="margin-top:10px;padding-left:18px;line-height:1.9">
+            <li><span class="katex-formula">b_0</span>：截距（X = 0 時的預測值）</li>
+            <li><span class="katex-formula">b_1</span>：斜率（X 每增加 1 單位，Ŷ 改變量）</li>
+            <li>殘差：<span class="katex-formula">e_i = Y_i - \hat{Y}_i</span></li>
+          </ul>
+        </div>
+        <div class="formula-box" style="margin-bottom:12px">
+          <div style="font-weight:700;color:#0369a1;margin-bottom:6px">OLS 估計量</div>
+          <div style="text-align:center">
+            <span class="katex-formula">b_1 = \frac{\sum(X_i-\bar{X})(Y_i-\bar{Y})}{\sum(X_i-\bar{X})^2} = r_{XY}\frac{S_Y}{S_X}</span>
+          </div>
+          <div style="text-align:center;margin-top:6px">
+            <span class="katex-formula">b_0 = \bar{Y} - b_1\bar{X}</span>
+          </div>
+        </div>
+        <div class="formula-box" style="margin-bottom:12px">
+          <div style="font-weight:700;color:#0369a1;margin-bottom:6px">模型效果評估</div>
+          <table class="qr-table">
+            <tr><th>統計量</th><th>公式</th><th>說明</th></tr>
+            <tr>
+              <td><strong>R²</strong></td>
+              <td><span class="katex-formula">R^2 = \frac{SSR}{SST} = r_{XY}^2</span></td>
+              <td>X 解釋 Y 變異的比例（0–1）</td>
+            </tr>
+            <tr>
+              <td><strong>t 檢定</strong></td>
+              <td><span class="katex-formula">t = \frac{b_1}{SE_{b_1}},\;df=n-2</span></td>
+              <td>H₀: β₁ = 0（斜率為零）</td>
+            </tr>
+            <tr>
+              <td><strong>F 檢定</strong></td>
+              <td><span class="katex-formula">F = \frac{MSR}{MSE},\;df=(1,\,n-2)</span></td>
+              <td>整體模型顯著性（單迴歸中 F = t²）</td>
+            </tr>
+          </table>
+        </div>
+        <div class="tip-box">單迴歸中 <strong>R² = r²</strong>（Pearson 相關係數的平方），且 t 檢定與 r 顯著性檢定等價。</div>
+      </div>
+
+      <!-- TAB: Stata -->
+      <div class="tab-content simp-Stata">
+        <p style="margin-bottom:8px"><strong>情境：</strong>以幸福感（nhappy）預測朋友數（friend）</p>
+        <div class="stata-block">
+<pre>* 執行迴歸
+regress friend nhappy
+
+* 取得預測值與殘差
+predict yhat
+predict residual, resid
+
+* 列出前5筆比較
+list friend nhappy yhat residual in 1/5
+
+* 散佈圖 + 迴歸線 + 殘差線
+twoway (lfit friend nhappy) ///
+       (scatter friend nhappy) ///
+       (dropline residual nhappy)
+
+* 類別自變數（虛擬變數）用 i. 前綴
+regress friend i.a1 if year == 1997
+margins i.a1
+marginsplot</pre>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <strong>i. 前綴：</strong>Stata 自動建立虛擬變數，以第一個類別為參照組。<br>
+          <strong>margins：</strong>計算各類別在迴歸模型下的預測邊際值（Adjusted Means）。<br>
+          <strong>marginsplot：</strong>將 margins 結果視覺化，含 95% 信賴區間。
+        </div>
+      </div>
+
+      <!-- TAB: 判讀 -->
+      <div class="tab-content simp-判讀">
+        <div style="font-weight:700;color:#0369a1;margin-bottom:8px">Stata regress 輸出對照</div>
+        <table class="qr-table" style="margin-bottom:12px">
+          <tr><th>輸出欄位</th><th>意義</th><th>判斷要點</th></tr>
+          <tr>
+            <td><span class="mc">Coef.</span></td>
+            <td>斜率 b₁ / 截距 b₀</td>
+            <td>斜率方向＋大小是否符合理論</td>
+          </tr>
+          <tr>
+            <td><span class="mc">Std. Err.</span></td>
+            <td>標準誤</td>
+            <td>越小越精確；VIF 高時 SE 偏大</td>
+          </tr>
+          <tr>
+            <td><span class="mc">t / P>|t|</span></td>
+            <td>t 值與 p 值</td>
+            <td>p &lt; .05 表示斜率顯著不為零</td>
+          </tr>
+          <tr>
+            <td><span class="mc">R-squared</span></td>
+            <td>R²</td>
+            <td>解釋變異量百分比（社科常見 .10–.30）</td>
+          </tr>
+          <tr>
+            <td><span class="mc">Adj. R-squared</span></td>
+            <td>調整後 R²</td>
+            <td>加入更多變數時比較模型優劣的基準</td>
+          </tr>
+          <tr>
+            <td><span class="mc">F / Prob > F</span></td>
+            <td>F 統計量</td>
+            <td>整體模型是否顯著優於「沒有自變數」</td>
+          </tr>
+        </table>
+        <div class="tip-box">
+          <strong>報告格式參考：</strong><br>
+          b = 0.15, SE = 0.04, t(298) = 3.75, p &lt; .001, R² = .045<br>
+          → 幸福感每增加 1 分，朋友數預測增加 0.15 人（p &lt; .001），幸福感解釋朋友數變異的 4.5%。
+        </div>
+      </div>
+
+    </div><!-- end card-simp -->
+
+    <!-- ======== card-ctrl: 統計控制與淨相關係數 ======== -->
+    <div class="method-card bg-ctrl" id="card-ctrl">
+      <div class="card-header">
+        <div class="card-icon">🔬</div>
+        <div>
+          <div class="card-title">統計控制與淨相關係數</div>
+          <div class="card-subtitle">Statistical Control &amp; Partial Correlation</div>
+        </div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'ctrl','因果')">🧩 因果論述</button>
+        <button class="tab-btn" onclick="switchTab(this,'ctrl','控制')">🔗 控制變項</button>
+        <button class="tab-btn" onclick="switchTab(this,'ctrl','淨相關')">📐 淨相關係數</button>
+        <button class="tab-btn" onclick="switchTab(this,'ctrl','模型')">🏗️ 模型界定</button>
+      </div>
+
+      <!-- TAB: 因果論述 -->
+      <div class="tab-content ctrl-因果 active">
+        <div class="tip-box" style="margin-bottom:12px">
+          <strong>因果推論三條件（必要，非充分）：</strong>
+          <ol style="margin:6px 0 0 18px;line-height:1.9">
+            <li><strong>共變性</strong>：X 與 Y 有統計關聯</li>
+            <li><strong>時間順序</strong>：原因先於結果</li>
+            <li><strong>排除第三變數</strong>：無混淆變數（lurking variable）解釋關聯</li>
+          </ol>
+        </div>
+        <div style="font-weight:700;margin-bottom:8px">三種虛假關聯型態（Stevens 2004）</div>
+        <table class="qr-table" style="margin-bottom:12px">
+          <tr><th>類型</th><th>路徑示意</th><th>說明</th></tr>
+          <tr>
+            <td><strong>因果關係</strong><br><small>Causation</small></td>
+            <td><span class="mc">X → Y</span></td>
+            <td>X 直接影響 Y；控制 Z 後關聯仍存在</td>
+          </tr>
+          <tr>
+            <td><strong>共同反應</strong><br><small>Common Response</small></td>
+            <td><span class="mc">Z → X<br>Z → Y</span></td>
+            <td>X 與 Y 皆受第三變數 Z 驅動，X↔Y 為虛假關聯</td>
+          </tr>
+          <tr>
+            <td><strong>混淆</strong><br><small>Confounding</small></td>
+            <td><span class="mc">X → Y<br>Z → Y（Z 與 X 相關）</span></td>
+            <td>Z 同時影響 X 與 Y，使 X→Y 估計偏誤</td>
+          </tr>
+        </table>
+        <div class="tip-box"><strong>統計控制的功能：</strong>固定第三變數 Z 的值，觀察 X 與 Y 的淨關聯，以排除混淆干擾。</div>
+      </div>
+
+      <!-- TAB: 控制變項 -->
+      <div class="tab-content ctrl-控制">
+        <div style="font-weight:700;color:#9333ea;margin-bottom:8px">控制變項六種類型</div>
+        <table class="qr-table">
+          <tr><th>類型</th><th>路徑結構</th><th>控制後效果</th></tr>
+          <tr>
+            <td><strong>前置變項</strong><br><small>Antecedent</small></td>
+            <td><span class="mc">Z → X → Y</span></td>
+            <td>控制 Z 後，X→Y 仍顯著；Z 影響 X 的起點</td>
+          </tr>
+          <tr>
+            <td><strong>混淆變項</strong><br><small>Confounding</small></td>
+            <td><span class="mc">Z→X, Z→Y</span></td>
+            <td>控制 Z 後，X→Y 關聯減弱或消失</td>
+          </tr>
+          <tr>
+            <td><strong>中介變項</strong><br><small>Intervening</small></td>
+            <td><span class="mc">X → Z → Y</span></td>
+            <td>控制 Z 後，X→Y 關聯消失（Z 是傳導機制）</td>
+          </tr>
+          <tr>
+            <td><strong>調節變項</strong><br><small>Moderating</small></td>
+            <td><span class="mc">Z 改變 X→Y 強度</span></td>
+            <td>X×Z 交互作用項顯著；需加入交互作用項</td>
+          </tr>
+          <tr>
+            <td><strong>壓制變項</strong><br><small>Suppressor</small></td>
+            <td><span class="mc">Z 掩蓋 X→Y</span></td>
+            <td>控制 Z 後，X→Y 關聯增強或反向</td>
+          </tr>
+        </table>
+        <div class="tip-box" style="margin-top:10px">
+          <strong>判斷原則：</strong>比較加入控制變數前後 b₁ 的變化方向與大小。關聯消失 → 中介或混淆；關聯增強 → 壓制；關聯不變 → 前置或無關。
+        </div>
+      </div>
+
+      <!-- TAB: 淨相關係數 -->
+      <div class="tab-content ctrl-淨相關">
+        <div class="formula-box" style="margin-bottom:12px">
+          <div style="font-weight:700;color:#9333ea;margin-bottom:6px">淨相關係數（Partial Correlation）</div>
+          <div style="text-align:center">
+            <span class="katex-formula">r_{XY \cdot Z} = \frac{r_{XY} - r_{XZ} \cdot r_{YZ}}{\sqrt{1 - r_{XZ}^2} \cdot \sqrt{1 - r_{YZ}^2}}</span>
+          </div>
+          <ul style="margin-top:10px;padding-left:18px;line-height:1.9">
+            <li>固定（控制）Z 後，X 與 Y 的純淨相關</li>
+            <li>排除 Z 對 X 與 Y 各自的線性影響</li>
+            <li>可控制多個變數：<span class="katex-formula">r_{XY \cdot Z_1 Z_2 \cdots Z_q}</span></li>
+          </ul>
+        </div>
+        <div class="formula-box" style="margin-bottom:12px">
+          <div style="font-weight:700;color:#9333ea;margin-bottom:6px">顯著性檢定</div>
+          <div style="text-align:center">
+            <span class="katex-formula">t = \frac{r_{XY \cdot Z}\sqrt{n - 2 - q}}{\sqrt{1 - r_{XY \cdot Z}^2}}, \quad df = n - 2 - q</span>
+          </div>
+          <p style="margin-top:6px;font-size:.88rem">q = 被控制的變數個數；H₀: ρ<sub>XY·Z</sub> = 0</p>
+        </div>
+        <div style="margin-top:10px;font-weight:700">與迴歸係數的關係</div>
+        <div class="tip-box" style="margin-top:6px">
+          多元迴歸中的標準化迴歸係數（beta）≠ 淨相關係數，但兩者概念相近——都是「控制其他變數後」X 對 Y 的效果。淨相關係數衡量<em>關聯強度</em>，迴歸係數衡量<em>斜率大小</em>。
+        </div>
+      </div>
+
+      <!-- TAB: 模型界定 -->
+      <div class="tab-content ctrl-模型">
+        <div style="font-weight:700;color:#9333ea;margin-bottom:8px">多元迴歸模型界定問題</div>
+        <table class="qr-table" style="margin-bottom:12px">
+          <tr><th>錯誤類型</th><th>後果</th><th>處理方式</th></tr>
+          <tr>
+            <td><strong>遺漏重要變數</strong><br><small>Omitted Variable</small></td>
+            <td>係數<strong>偏誤</strong>（Biased）<br>估計不一致</td>
+            <td>根據理論納入控制變數</td>
+          </tr>
+          <tr>
+            <td><strong>納入無關變數</strong><br><small>Irrelevant Variable</small></td>
+            <td>係數<strong>無效率</strong>（Inefficient）<br>標準誤增大</td>
+            <td>以理論與 p 值決定是否保留</td>
+          </tr>
+          <tr>
+            <td><strong>錯誤函數形式</strong><br><small>Wrong Functional Form</small></td>
+            <td>非線性效果被誤估</td>
+            <td>加入 X²、取 log、加交互作用</td>
+          </tr>
+        </table>
+        <div style="font-weight:700;margin-bottom:8px">多重共線性（Multicollinearity）</div>
+        <table class="qr-table" style="margin-bottom:12px">
+          <tr><th>指標</th><th>標準</th><th>說明</th></tr>
+          <tr>
+            <td><strong>VIF</strong></td>
+            <td>VIF &gt; 10 警示<br>VIF &gt; 30 嚴重</td>
+            <td>Stata: <span class="mc">vif</span>（regress 後）</td>
+          </tr>
+          <tr>
+            <td><strong>症狀</strong></td>
+            <td>—</td>
+            <td>R² 高但個別 p 皆不顯著；係數不穩定</td>
+          </tr>
+          <tr>
+            <td><strong>處理</strong></td>
+            <td>—</td>
+            <td>刪除高相關自變數、主成分分析、Ridge 迴歸</td>
+          </tr>
+        </table>
+        <div class="tip-box">
+          <strong>模型選擇原則：</strong>由<em>理論</em>驅動，而非資料挖掘。R² 較高不代表模型較好，應比較 Adjusted R² 與 AIC/BIC，並確保每個變數納入都有理論依據。
+        </div>
+      </div>
+
+    </div><!-- end card-ctrl -->
+
   </div><!-- end cards-grid -->
 
   <!-- ========== QUICK REFERENCE ========== -->
@@ -1751,12 +2093,24 @@ var results = {
         title: '🔗 χ² 獨立性／同質性檢定', sub: 'Independence / Homogeneity',
         hint: '兩個類別變數，檢定是否有關聯。<br>期望次數：<code>Eᵢⱼ = (列總和 × 行總和) / n</code>；自由度：<code>df=(R-1)(C-1)</code>。<br>若顯著 → 計算標準化殘差 <code>SR=(O-E)/√E</code>。<br>Stata：<code>tabulate x y, chi2 expected</code>',
         card: 'card-indep'
+    },
+    'simp': {
+        cls: 'rc-simp', color: '#0369a1', btnCls: 'go-btn go-btn-simp',
+        title: '📈 單迴歸分析', sub: '1 個連續自變數，OLS 直線估計',
+        hint: '建立 Ŷ = b₀ + b₁X，估計 X 對 Y 的線性效果。<br>R² = r²（Pearson 的平方）；斜率 t 檢定 df = n−2。<br>Stata：<code>regress y x</code>、<code>predict yhat</code>、<code>predict residual, resid</code>',
+        card: 'card-simp'
+    },
+    'ctrl': {
+        cls: 'rc-ctrl', color: '#9333ea', btnCls: 'go-btn go-btn-ctrl',
+        title: '🔬 統計控制與多元迴歸', sub: '多個自變數、淨效果、因果論述',
+        hint: '控制混淆變數後估計 X 對 Y 的淨效果。<br>淨相關：<code>r_XY·Z = (r_XY − r_XZ·r_YZ) / (√(1−r²_XZ)·√(1−r²_YZ))</code>。<br>Stata：<code>reg y x1 x2, beta</code>、<code>vif</code>',
+        card: 'card-ctrl'
     }
 };
 
 // 5. 決策嚮導：第二步 (連續變數的母體數)
 function pick2_cont(num) {
-    var type = { '1': 'single', '2': 'double', '3': 'oneway', '4': 'twoway', '5': 'reg' }[num];
+    var type = { '1': 'single', '2': 'double', '3': 'oneway', '4': 'twoway', '5': 'simp', '6': 'ctrl' }[num];
     showResultCard(type);
     document.getElementById('q2-cont-block').style.display = 'block';
     document.getElementById('q2-cat-block').style.display = 'none';
@@ -1823,6 +2177,13 @@ function toggleDark(){
     if(btn) btn.textContent = '☀️ 淺色';
   }
 })();
+
+window.addEventListener('load', function() {
+    if (typeof katex === 'undefined') return;
+    document.querySelectorAll('.katex-formula').forEach(function(el) {
+        try { katex.render(el.textContent, el, {throwOnError: false, displayMode: false}); } catch(e) {}
+    });
+});
 </script>
 </body>
 </html>
