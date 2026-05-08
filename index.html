@@ -136,7 +136,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang TC','Noto
 .ex-box.ex-teal{background:#e6fffa;border-color:#2c7a7b}
 .ex-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;opacity:.65}
 
-.stata-block{background:#0f1923;padding:14px 16px;border-radius:9px;font-family:'Courier New',monospace;font-size:.82rem;line-height:2;margin:10px 0;overflow-x:auto}
+.stata-block{background:#0f1923;padding:14px 16px;border-radius:9px;font-family:'Courier New',monospace;font-size:.82rem;line-height:2;margin:10px 0;overflow-x:auto;white-space:pre-wrap}
 .s-cmt{color:#718096}
 .s-cmd{color:#90cdf4}
 .s-var{color:#fc8181}
@@ -1689,26 +1689,26 @@ $\beta_1 = 5$ → $X$ 每增加 1 單位，$Y$ 預期增加 5 單位（以原始
       <div class="tab-content simp-Stata">
         <p style="margin-bottom:8px"><strong>情境：</strong>以幸福感（nhappy）預測朋友數（friend）</p>
         <div class="stata-block">
-<pre>* 執行迴歸
-regress friend nhappy
+<span class="s-cmt">* ─── 執行迴歸 ───</span>
+<span class="s-cmd">regress</span> <span class="s-var">friend nhappy</span>
 
-* 取得預測值與殘差
-predict yhat
-predict residual, resid
+<span class="s-cmt">* ─── 取得預測值與殘差 ───</span>
+<span class="s-cmd">predict</span> <span class="s-var">yhat</span>
+<span class="s-cmd">predict</span> <span class="s-var">residual</span>, <span class="s-opt">resid</span>
 
-* 列出前5筆比較
-list friend nhappy yhat residual in 1/5
+<span class="s-cmt">* ─── 列出前 5 筆比較 ───</span>
+<span class="s-cmd">list</span> <span class="s-var">friend nhappy yhat residual</span> <span class="s-opt">in 1/5</span>
 
-* 散佈圖 + 迴歸線 + 殘差線
-twoway (lfit friend nhappy) ///
-       (scatter friend nhappy) ///
-       (dropline residual nhappy)
+<span class="s-cmt">* ─── 散佈圖 + 迴歸線 + 殘差線 ───</span>
+<span class="s-cmd">twoway</span> (<span class="s-opt">lfit</span> <span class="s-var">friend nhappy</span>) <span class="s-opt">///</span>
+       (<span class="s-opt">scatter</span> <span class="s-var">friend nhappy</span>) <span class="s-opt">///</span>
+       (<span class="s-opt">dropline</span> <span class="s-var">residual nhappy</span>)
 
-* 類別自變數（虛擬變數）用 i. 前綴
-regress friend i.a1 if year == 1997
-margins i.a1
-marginsplot</pre>
-        </div>
+<span class="s-cmt">* ─── 類別自變數：用 i. 建立虛擬變數 ───</span>
+<span class="s-cmd">regress</span> <span class="s-var">friend</span> <span class="s-opt">i.</span><span class="s-var">a1</span> <span class="s-opt">if</span> <span class="s-var">year</span> == <span class="s-num">1997</span>
+<span class="s-cmd">margins</span> <span class="s-opt">i.</span><span class="s-var">a1</span>
+<span class="s-cmd">marginsplot</span>
+</div>
         <div class="tip-box" style="margin-top:10px">
           <strong>i. 前綴：</strong>Stata 自動建立虛擬變數，以第一個類別為參照組。<br>
           <strong>margins：</strong>計算各類別在迴歸模型下的預測邊際值（Adjusted Means）。<br>
